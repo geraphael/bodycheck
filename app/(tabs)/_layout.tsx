@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { User, MapPin, Heart, UserCircle } from 'lucide-react-native';
+import { User, MapPin, Heart, CircleUser as UserCircle } from 'lucide-react-native';
 
 export default function TabLayout() {
   return (
