@@ -158,39 +158,39 @@ export default function AssessmentScreen() {
       <View style={styles.processingContainer}>
         <View style={styles.processingCard}>
           <Brain size={48} color="#2563EB" />
-          <Text style={styles.processingTitle}>AI Analysis in Progress</Text>
+          <Text style={styles.processingTitle}>Analyzing Your Health Information</Text>
           <Text style={styles.processingSubtitle}>
-            Our advanced AI is analyzing your symptoms and medical history
+            Our smart system is looking at your symptoms and creating a personalized health report
           </Text>
           
           <View style={styles.progressContainer}>
             <ActivityIndicator size="large" color="#2563EB" />
             <Text style={styles.progressText}>
-              Processing medical data and generating diagnosis...
+              Reviewing your answers and creating your health insights...
             </Text>
           </View>
           
           <View style={styles.processingSteps}>
             <View style={styles.stepItem}>
               <CheckCircle size={16} color="#059669" />
-              <Text style={styles.stepText}>Symptom pattern analysis</Text>
+              <Text style={styles.stepText}>Looking at your symptoms</Text>
             </View>
             <View style={styles.stepItem}>
               <CheckCircle size={16} color="#059669" />
-              <Text style={styles.stepText}>Medical database cross-reference</Text>
+              <Text style={styles.stepText}>Checking medical information</Text>
             </View>
             <View style={styles.stepItem}>
               <ActivityIndicator size={16} color="#2563EB" />
-              <Text style={styles.stepText}>AI diagnosis generation</Text>
+              <Text style={styles.stepText}>Creating your health report</Text>
             </View>
             <View style={styles.stepItem}>
               <View style={[styles.stepDot, { backgroundColor: '#E5E7EB' }]} />
-              <Text style={[styles.stepText, { color: '#9CA3AF' }]}>Treatment recommendations</Text>
+              <Text style={[styles.stepText, { color: '#9CA3AF' }]}>Preparing recommendations</Text>
             </View>
           </View>
           
           <Text style={styles.timeEstimate}>
-            Estimated time: 40 seconds
+            This usually takes about 40 seconds
           </Text>
         </View>
       </View>
@@ -200,7 +200,7 @@ export default function AssessmentScreen() {
   if (!currentQuestion) {
     return (
       <View style={styles.container}>
-        <Text>Loading assessment...</Text>
+        <Text>Loading your health assessment...</Text>
       </View>
     );
   }
@@ -212,9 +212,9 @@ export default function AssessmentScreen() {
           <ChevronLeft size={24} color="#2563EB" />
         </TouchableOpacity>
         <View style={styles.headerInfo}>
-          <Text style={styles.title}>Smart Assessment</Text>
+          <Text style={styles.title}>Health Assessment</Text>
           <Text style={styles.subtitle}>
-            {category?.charAt(0).toUpperCase() + category?.slice(1)} • {gender} • {age}
+            {category?.charAt(0).toUpperCase() + category?.slice(1)} <Text>•</Text> {gender} <Text>•</Text> {age}
           </Text>
         </View>
       </View>
@@ -229,7 +229,7 @@ export default function AssessmentScreen() {
           />
         </View>
         <Text style={styles.progressText}>
-          Question {currentQuestionIndex + 1} of {questions.length}
+          {currentQuestionIndex + 1} of {questions.length} questions
         </Text>
       </View>
 
@@ -237,7 +237,7 @@ export default function AssessmentScreen() {
         <View style={styles.diseasesHint}>
           <Brain size={16} color="#2563EB" />
           <Text style={styles.diseasesHintText}>
-            AI is considering: {possibleDiseases.slice(0, 3).join(', ')}
+            We're considering: {possibleDiseases.slice(0, 3).join(', ')}
             {possibleDiseases.length > 3 && ` +${possibleDiseases.length - 3} more`}
           </Text>
         </View>
@@ -282,7 +282,7 @@ export default function AssessmentScreen() {
                   </Text>
                   {symptom.relatedDiseases.length > 0 && (
                     <Text style={styles.relatedDiseases}>
-                      Related to: {symptom.relatedDiseases.slice(0, 2).join(', ')}
+                      May be related to: {symptom.relatedDiseases.slice(0, 2).join(', ')}
                     </Text>
                   )}
                 </TouchableOpacity>
@@ -338,7 +338,7 @@ export default function AssessmentScreen() {
             <View style={styles.scaleContainer}>
               <View style={styles.scaleLabels}>
                 <Text style={styles.scaleLabel}>No discomfort</Text>
-                <Text style={styles.scaleLabel}>Severe discomfort</Text>
+                <Text style={styles.scaleLabel}>Very uncomfortable</Text>
               </View>
               <View style={styles.scaleOptions}>
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((number) => (
@@ -389,7 +389,7 @@ export default function AssessmentScreen() {
             styles.nextButtonText,
             !canProceed() && styles.navButtonTextDisabled
           ]}>
-            {isLastQuestion ? 'Generate AI Diagnosis' : 'Next'}
+            {isLastQuestion ? 'Get My Health Report' : 'Next'}
           </Text>
           <ChevronRight size={20} color={canProceed() ? '#FFFFFF' : '#9CA3AF'} />
         </TouchableOpacity>

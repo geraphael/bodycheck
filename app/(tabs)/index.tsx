@@ -63,7 +63,7 @@ export default function HomeScreen() {
         <View style={styles.instructionBanner}>
           <Brain size={20} color="#2563EB" />
           <Text style={styles.instructionText}>
-            Select the category that best describes your primary concern
+            Choose the area that best describes your main health concern
           </Text>
         </View>
 
@@ -89,14 +89,15 @@ export default function HomeScreen() {
             <Activity size={32} color="#059669" style={styles.activityIcon} />
           </View>
           <Text style={styles.title}>BodyCheck+</Text>
-          <Text style={styles.subtitle}>AI-Powered Medical Assessment</Text>
+          <Text style={styles.subtitle}>AI-Powered Health Assessment</Text>
           <Text style={styles.description}>
-            Advanced symptom analysis using intelligent questioning and machine learning algorithms
+            Get personalized health insights using smart questions and advanced technology
           </Text>
         </View>
 
         <View style={styles.selectionSection}>
-          <Text style={styles.sectionTitle}>Select Gender</Text>
+          <Text style={styles.sectionTitle}>Tell us about yourself</Text>
+          <Text style={styles.sectionSubtitle}>Choose your gender</Text>
           <View style={styles.genderSelector}>
             <TouchableOpacity
               style={[
@@ -109,16 +110,12 @@ export default function HomeScreen() {
                 styles.genderIconContainer,
                 selectedGender === 'male' && styles.genderIconContainerActive
               ]}>
-                <User size={32} color={selectedGender === 'male' ? '#FFFFFF' : '#2563EB'} />
+                <User size={20} color={selectedGender === 'male' ? '#FFFFFF' : '#2563EB'} />
               </View>
               <Text style={[
                 styles.genderText,
                 selectedGender === 'male' && styles.genderTextActive
               ]}>Male</Text>
-              <Text style={[
-                styles.genderSubtext,
-                selectedGender === 'male' && styles.genderSubtextActive
-              ]}>Male-specific health assessment</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -132,23 +129,19 @@ export default function HomeScreen() {
                 styles.genderIconContainer,
                 selectedGender === 'female' && styles.genderIconContainerActive
               ]}>
-                <Users size={32} color={selectedGender === 'female' ? '#FFFFFF' : '#2563EB'} />
+                <Users size={20} color={selectedGender === 'female' ? '#FFFFFF' : '#2563EB'} />
               </View>
               <Text style={[
                 styles.genderText,
                 selectedGender === 'female' && styles.genderTextActive
               ]}>Female</Text>
-              <Text style={[
-                styles.genderSubtext,
-                selectedGender === 'female' && styles.genderSubtextActive
-              ]}>Female-specific health assessment</Text>
             </TouchableOpacity>
           </View>
         </View>
 
         {selectedGender && (
           <View style={styles.selectionSection}>
-            <Text style={styles.sectionTitle}>Select Age Range</Text>
+            <Text style={styles.sectionTitle}>What's your age range?</Text>
             <AgeSelector
               selectedAge={selectedAge}
               onAgeSelect={handleAgeSelect}
@@ -160,34 +153,34 @@ export default function HomeScreen() {
           <View style={styles.continueSection}>
             <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
               <Brain size={20} color="#FFFFFF" />
-              <Text style={styles.continueButtonText}>Start AI Assessment</Text>
+              <Text style={styles.continueButtonText}>Start Health Assessment</Text>
             </TouchableOpacity>
           </View>
         )}
 
         <View style={styles.featuresSection}>
-          <Text style={styles.featuresTitle}>Advanced Features</Text>
+          <Text style={styles.featuresTitle}>What makes us different</Text>
           <View style={styles.featuresList}>
             <View style={styles.featureItem}>
               <Brain size={20} color="#2563EB" />
-              <Text style={styles.featureText}>AI-powered symptom analysis</Text>
+              <Text style={styles.featureText}>Smart symptom analysis</Text>
             </View>
             <View style={styles.featureItem}>
               <Activity size={20} color="#059669" />
-              <Text style={styles.featureText}>Intelligent question hierarchy</Text>
+              <Text style={styles.featureText}>Easy-to-understand questions</Text>
             </View>
             <View style={styles.featureItem}>
               <Stethoscope size={20} color="#7C3AED" />
-              <Text style={styles.featureText}>Professional-grade diagnosis</Text>
+              <Text style={styles.featureText}>Professional-grade insights</Text>
             </View>
           </View>
         </View>
 
         <View style={styles.disclaimer}>
           <Text style={styles.disclaimerText}>
-            <Text style={styles.disclaimerTitle}>Medical Disclaimer: </Text>
-            This app provides AI-generated health insights and should not replace professional medical advice{<Text>.</Text>}
-            Always consult with a healthcare provider for medical concerns{<Text>.</Text>}
+            <Text style={styles.disclaimerTitle}>Important: </Text>
+            This app gives you health information but cannot replace a real doctor<Text>.</Text>
+            Always talk to a healthcare professional about your health concerns<Text>.</Text>
           </Text>
         </View>
       </ScrollView>
@@ -247,56 +240,54 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: 'Inter-SemiBold',
     color: '#1F2937',
+    marginBottom: 8,
+  },
+  sectionSubtitle: {
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    color: '#6B7280',
     marginBottom: 16,
   },
   genderSelector: {
-    gap: 16,
+    flexDirection: 'row',
+    gap: 12,
   },
   genderCard: {
+    flex: 1,
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 24,
+    borderRadius: 12,
+    padding: 16,
     alignItems: 'center',
     borderWidth: 2,
     borderColor: '#E5E7EB',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   genderCardActive: {
     borderColor: '#2563EB',
     backgroundColor: '#EFF6FF',
   },
   genderIconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: '#EFF6FF',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
+    marginBottom: 8,
   },
   genderIconContainerActive: {
     backgroundColor: '#2563EB',
   },
   genderText: {
-    fontSize: 24,
-    fontFamily: 'Inter-Bold',
+    fontSize: 16,
+    fontFamily: 'Inter-SemiBold',
     color: '#1F2937',
-    marginBottom: 8,
   },
   genderTextActive: {
-    color: '#2563EB',
-  },
-  genderSubtext: {
-    fontSize: 14,
-    fontFamily: 'Inter-Regular',
-    color: '#6B7280',
-    textAlign: 'center',
-  },
-  genderSubtextActive: {
     color: '#2563EB',
   },
   continueSection: {

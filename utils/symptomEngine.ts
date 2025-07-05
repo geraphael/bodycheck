@@ -36,49 +36,49 @@ const symptomDatabase: Record<string, Symptom[]> = {
     {
       id: 'headache_tension',
       name: 'Tension Headache',
-      description: 'Dull, aching head pain with tightness around forehead',
+      description: 'Dull, aching head pain with tightness around your forehead',
       severity: 'mild',
       relatedDiseases: ['Tension Headache', 'Stress-related Headache', 'Muscle Tension']
     },
     {
       id: 'headache_migraine',
       name: 'Migraine-like Headache',
-      description: 'Throbbing, pulsating pain often on one side',
+      description: 'Throbbing, pulsating pain often on one side of your head',
       severity: 'moderate',
       relatedDiseases: ['Migraine', 'Cluster Headache', 'Vascular Headache']
     },
     {
       id: 'headache_sudden_severe',
       name: 'Sudden Severe Headache',
-      description: 'Worst headache of your life, came on suddenly',
+      description: 'The worst headache of your life that came on suddenly',
       severity: 'severe',
       relatedDiseases: ['Subarachnoid Hemorrhage', 'Meningitis', 'Brain Aneurysm']
     },
     {
       id: 'dizziness_lightheaded',
       name: 'Lightheadedness',
-      description: 'Feeling faint or about to pass out',
+      description: 'Feeling faint or like you might pass out',
       severity: 'mild',
       relatedDiseases: ['Dehydration', 'Low Blood Pressure', 'Anemia']
     },
     {
       id: 'dizziness_vertigo',
       name: 'Vertigo',
-      description: 'Spinning sensation, room feels like it\'s moving',
+      description: 'Spinning sensation, like the room is moving around you',
       severity: 'moderate',
       relatedDiseases: ['BPPV', 'Vestibular Neuritis', 'Meniere\'s Disease']
     },
     {
       id: 'confusion',
       name: 'Confusion',
-      description: 'Difficulty thinking clearly or remembering',
+      description: 'Difficulty thinking clearly or remembering things',
       severity: 'moderate',
       relatedDiseases: ['Delirium', 'Dementia', 'Medication Side Effects']
     },
     {
       id: 'memory_loss',
       name: 'Memory Problems',
-      description: 'Difficulty remembering recent events or information',
+      description: 'Trouble remembering recent events or information',
       severity: 'moderate',
       relatedDiseases: ['Alzheimer\'s Disease', 'Mild Cognitive Impairment', 'Depression']
     },
@@ -94,14 +94,14 @@ const symptomDatabase: Record<string, Symptom[]> = {
     {
       id: 'chest_pain_crushing',
       name: 'Crushing Chest Pain',
-      description: 'Heavy pressure or squeezing sensation in chest',
+      description: 'Heavy pressure or squeezing sensation in your chest',
       severity: 'severe',
-      relatedDiseases: ['Myocardial Infarction', 'Unstable Angina', 'Aortic Dissection']
+      relatedDiseases: ['Heart Attack', 'Unstable Angina', 'Aortic Dissection']
     },
     {
       id: 'chest_pain_sharp',
       name: 'Sharp Chest Pain',
-      description: 'Stabbing or knife-like pain in chest',
+      description: 'Stabbing or knife-like pain in your chest',
       severity: 'moderate',
       relatedDiseases: ['Pericarditis', 'Pleuritis', 'Costochondritis']
     },
@@ -129,7 +129,7 @@ const symptomDatabase: Record<string, Symptom[]> = {
     {
       id: 'leg_swelling',
       name: 'Leg Swelling',
-      description: 'Swelling in ankles, feet, or legs',
+      description: 'Swelling in your ankles, feet, or legs',
       severity: 'mild',
       relatedDiseases: ['Heart Failure', 'Venous Insufficiency', 'Kidney Disease']
     },
@@ -173,7 +173,7 @@ const symptomDatabase: Record<string, Symptom[]> = {
     {
       id: 'chest_tightness',
       name: 'Chest Tightness',
-      description: 'Feeling of pressure or constriction in chest',
+      description: 'Feeling of pressure or constriction in your chest',
       severity: 'moderate',
       relatedDiseases: ['Asthma', 'Anxiety', 'Costochondritis']
     }
@@ -203,7 +203,7 @@ const symptomDatabase: Record<string, Symptom[]> = {
     {
       id: 'abdominal_pain_cramping',
       name: 'Cramping Abdominal Pain',
-      description: 'Intermittent, cramping pain in abdomen',
+      description: 'Intermittent, cramping pain in your abdomen',
       severity: 'mild',
       relatedDiseases: ['Irritable Bowel Syndrome', 'Gastroenteritis', 'Food Intolerance']
     },
@@ -233,7 +233,7 @@ const symptomDatabase: Record<string, Symptom[]> = {
     {
       id: 'joint_pain_mild',
       name: 'Mild Joint Pain',
-      description: 'Aching or stiffness in joints',
+      description: 'Aching or stiffness in your joints',
       severity: 'mild',
       relatedDiseases: ['Osteoarthritis', 'Overuse Injury', 'Viral Arthritis']
     },
@@ -254,14 +254,14 @@ const symptomDatabase: Record<string, Symptom[]> = {
     {
       id: 'back_pain_lower',
       name: 'Lower Back Pain',
-      description: 'Pain in lower back region',
+      description: 'Pain in your lower back region',
       severity: 'moderate',
       relatedDiseases: ['Muscle Strain', 'Herniated Disc', 'Sciatica']
     },
     {
       id: 'neck_stiffness',
       name: 'Neck Stiffness',
-      description: 'Difficulty moving neck, stiffness',
+      description: 'Difficulty moving your neck, stiffness',
       severity: 'moderate',
       relatedDiseases: ['Muscle Strain', 'Meningitis', 'Cervical Spondylosis']
     }
@@ -318,7 +318,7 @@ export const getSymptomHierarchy = (category: string, gender: string, age: strin
   const baseQuestions: Question[] = [
     {
       id: 'primary_symptoms',
-      text: 'Which of these symptoms are you currently experiencing?',
+      text: 'Which of these symptoms are you experiencing right now?',
       type: 'symptoms',
       symptoms: categorySymptoms,
       required: true,
@@ -340,7 +340,7 @@ export const getSymptomHierarchy = (category: string, gender: string, age: strin
     },
     {
       id: 'severity_scale',
-      text: 'On a scale of 1-10, how would you rate your overall discomfort?',
+      text: 'How uncomfortable are you feeling right now?',
       type: 'scale',
       required: true,
     },
@@ -364,11 +364,11 @@ const getCategorySpecificQuestions = (category: string, gender: string, age: str
     neurological: [
       {
         id: 'headache_location',
-        text: 'If you have a headache, where is it located?',
+        text: 'If you have a headache, where do you feel it?',
         type: 'multiple',
         options: [
-          'Forehead/front of head',
-          'Temples (sides)',
+          'Front of head/forehead',
+          'Sides of head (temples)',
           'Back of head/neck',
           'Top of head',
           'Behind eyes',
@@ -380,7 +380,7 @@ const getCategorySpecificQuestions = (category: string, gender: string, age: str
       },
       {
         id: 'neurological_associated',
-        text: 'Are you experiencing any of these additional symptoms?',
+        text: 'Are you experiencing any of these other symptoms?',
         type: 'multiple',
         options: [
           'Nausea or vomiting',
@@ -422,7 +422,7 @@ const getCategorySpecificQuestions = (category: string, gender: string, age: str
           'Neck',
           'Back',
           'Stomach',
-          'No radiation'
+          'No spreading pain'
         ],
         required: false,
       }
@@ -430,7 +430,7 @@ const getCategorySpecificQuestions = (category: string, gender: string, age: str
     gastrointestinal: [
       {
         id: 'abdominal_location',
-        text: 'If you have abdominal pain, where is it located?',
+        text: 'If you have stomach pain, where do you feel it?',
         type: 'multiple',
         options: [
           'Upper right (under ribs)',
@@ -439,15 +439,15 @@ const getCategorySpecificQuestions = (category: string, gender: string, age: str
           'Lower right',
           'Lower left',
           'Lower center',
-          'Around navel',
-          'All over abdomen',
-          'No abdominal pain'
+          'Around belly button',
+          'All over stomach',
+          'No stomach pain'
         ],
         required: false,
       },
       {
         id: 'bowel_changes',
-        text: 'Have you noticed any changes in bowel movements?',
+        text: 'Have you noticed any changes in your bowel movements?',
         type: 'multiple',
         options: [
           'Diarrhea',
@@ -485,7 +485,7 @@ export const generateAIDiagnosis = async (assessmentData: any): Promise<AIDiagno
 
   // Emergency conditions detection
   if (category === 'cardiovascular' && selectedSymptoms.includes('chest_pain_crushing') && severity >= 7) {
-    primaryDiagnosis = 'Acute Coronary Syndrome (Heart Attack)';
+    primaryDiagnosis = 'Possible Heart Attack';
     confidence = 85;
     diagnosisSeverity = 'emergency';
     recommendations = [
@@ -494,11 +494,11 @@ export const generateAIDiagnosis = async (assessmentData: any): Promise<AIDiagno
       'Sit upright and try to stay calm',
       'Do not drive yourself to hospital'
     ];
-    whenToSeekCare = 'IMMEDIATELY - This is a medical emergency';
-    reasoning = 'Crushing chest pain with high severity score suggests possible heart attack';
+    whenToSeekCare = 'RIGHT NOW - This is a medical emergency';
+    reasoning = 'Crushing chest pain with high discomfort level suggests possible heart attack';
   }
   else if (category === 'neurological' && selectedSymptoms.includes('headache_sudden_severe') && suddenOnset) {
-    primaryDiagnosis = 'Possible Subarachnoid Hemorrhage';
+    primaryDiagnosis = 'Possible Brain Emergency';
     confidence = 80;
     diagnosisSeverity = 'emergency';
     recommendations = [
@@ -507,11 +507,11 @@ export const generateAIDiagnosis = async (assessmentData: any): Promise<AIDiagno
       'Do not take pain medication',
       'Stay as still as possible'
     ];
-    whenToSeekCare = 'IMMEDIATELY - This is a medical emergency';
-    reasoning = 'Sudden severe headache ("worst headache of life") may indicate brain bleeding';
+    whenToSeekCare = 'RIGHT NOW - This is a medical emergency';
+    reasoning = 'Sudden severe headache may indicate brain bleeding or other serious brain problem';
   }
   else if (category === 'gastrointestinal' && selectedSymptoms.includes('vomiting_blood')) {
-    primaryDiagnosis = 'Upper Gastrointestinal Bleeding';
+    primaryDiagnosis = 'Serious Stomach Bleeding';
     confidence = 90;
     diagnosisSeverity = 'emergency';
     recommendations = [
@@ -520,7 +520,7 @@ export const generateAIDiagnosis = async (assessmentData: any): Promise<AIDiagno
       'Monitor for signs of shock',
       'Bring list of medications'
     ];
-    whenToSeekCare = 'IMMEDIATELY';
+    whenToSeekCare = 'RIGHT NOW';
     reasoning = 'Vomiting blood indicates serious bleeding requiring immediate medical attention';
   }
   // Urgent conditions
@@ -535,10 +535,10 @@ export const generateAIDiagnosis = async (assessmentData: any): Promise<AIDiagno
       'Monitor for worsening symptoms'
     ];
     whenToSeekCare = 'Within 2 hours';
-    reasoning = 'Right lower abdominal pain with moderate to severe intensity suggests appendicitis';
+    reasoning = 'Right lower stomach pain with moderate to severe intensity suggests appendicitis';
   }
   else if (category === 'respiratory' && selectedSymptoms.includes('shortness_breath_rest')) {
-    primaryDiagnosis = 'Acute Respiratory Distress';
+    primaryDiagnosis = 'Serious Breathing Problem';
     confidence = 70;
     diagnosisSeverity = 'urgent';
     recommendations = [
@@ -548,7 +548,7 @@ export const generateAIDiagnosis = async (assessmentData: any): Promise<AIDiagno
       'Monitor oxygen levels if possible'
     ];
     whenToSeekCare = 'Within 1-2 hours';
-    reasoning = 'Shortness of breath at rest indicates significant respiratory compromise';
+    reasoning = 'Shortness of breath at rest indicates significant breathing problem';
   }
   // Moderate conditions
   else if (category === 'neurological' && selectedSymptoms.includes('headache_migraine')) {
@@ -561,35 +561,35 @@ export const generateAIDiagnosis = async (assessmentData: any): Promise<AIDiagno
       'Take prescribed migraine medication',
       'Stay hydrated'
     ];
-    whenToSeekCare = 'If symptoms worsen or persist beyond 72 hours';
-    reasoning = 'Throbbing, one-sided headache pattern consistent with migraine';
+    whenToSeekCare = 'If symptoms get worse or last more than 3 days';
+    reasoning = 'Throbbing, one-sided headache pattern is consistent with migraine';
   }
   else if (category === 'gastrointestinal' && selectedSymptoms.includes('nausea_mild') && selectedSymptoms.includes('diarrhea_watery')) {
-    primaryDiagnosis = 'Viral Gastroenteritis';
+    primaryDiagnosis = 'Stomach Bug (Viral Gastroenteritis)';
     confidence = 75;
     diagnosisSeverity = 'mild';
     recommendations = [
       'Stay hydrated with clear fluids',
-      'BRAT diet (bananas, rice, applesauce, toast)',
+      'Eat bland foods (bananas, rice, toast)',
       'Rest and avoid dairy',
-      'Electrolyte replacement drinks'
+      'Use electrolyte replacement drinks'
     ];
-    whenToSeekCare = 'If symptoms persist beyond 3 days or dehydration occurs';
-    reasoning = 'Combination of nausea and watery diarrhea suggests viral gastroenteritis';
+    whenToSeekCare = 'If symptoms last more than 3 days or you become dehydrated';
+    reasoning = 'Combination of nausea and watery diarrhea suggests stomach bug';
   }
   // Default mild condition
   else {
-    primaryDiagnosis = 'Mild Symptoms - Monitor and Self-Care';
+    primaryDiagnosis = 'Mild Symptoms - Self-Care Recommended';
     confidence = 60;
     diagnosisSeverity = 'mild';
     recommendations = [
-      'Rest and adequate sleep',
+      'Rest and get adequate sleep',
       'Stay well hydrated',
       'Over-the-counter symptom relief as needed',
       'Monitor symptoms for changes'
     ];
-    whenToSeekCare = 'If symptoms worsen or persist beyond expected timeframe';
-    reasoning = 'Symptoms appear mild and may resolve with appropriate self-care';
+    whenToSeekCare = 'If symptoms get worse or don\'t improve as expected';
+    reasoning = 'Symptoms appear mild and may improve with appropriate self-care';
   }
 
   // Generate alternative diagnoses
