@@ -116,9 +116,9 @@ export default function ResultsScreen() {
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.aiHeader}>
           <Brain size={32} color="#2563EB" />
-          <Text style={styles.aiTitle}>AI-Powered Analysis Complete</Text>
+          <Text style={styles.aiTitle}>AI Analysis Complete</Text>
           <Text style={styles.aiSubtitle}>
-            Advanced machine learning algorithms have analyzed your symptoms
+            Advanced algorithms analyzed your symptoms
           </Text>
         </View>
 
@@ -166,7 +166,7 @@ export default function ResultsScreen() {
           <View style={styles.alternativesSection}>
             <Text style={styles.alternativesTitle}>Alternative Possibilities</Text>
             <Text style={styles.alternativesSubtitle}>
-              Other conditions the AI considered based on your symptoms
+              Other conditions considered based on your symptoms
             </Text>
             
             {diagnosis.alternativeDiagnoses.map((alt, index) => (
@@ -219,7 +219,7 @@ export default function ResultsScreen() {
         <View style={styles.actionsContainer}>
           <TouchableOpacity style={styles.emergencyButton} onPress={handleEmergencyCall}>
             <Phone size={20} color="#FFFFFF" />
-            <Text style={styles.emergencyButtonText}>Emergency Services</Text>
+            <Text style={styles.emergencyButtonText}>Emergency</Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.hospitalsButton} onPress={handleFindHospitals}>
@@ -230,7 +230,7 @@ export default function ResultsScreen() {
 
         <TouchableOpacity style={styles.saveButton} onPress={handleSaveToProfile}>
           <FileText size={20} color="#6B7280" />
-          <Text style={styles.saveButtonText}>Save to Personal Health Record</Text>
+          <Text style={styles.saveButtonText}>Save to Health Record</Text>
         </TouchableOpacity>
 
         <View style={styles.disclaimer}>

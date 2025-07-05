@@ -61,12 +61,12 @@ export default function HomeScreen() {
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.backButton} onPress={handleReset}>
-            <Text style={styles.backButtonText}>← Back to Selection</Text>
+            <Text style={styles.backButtonText}>← Back</Text>
           </TouchableOpacity>
           
           <View style={styles.selectionInfo}>
             <Text style={styles.selectionText}>
-              {selectedGender === 'male' ? 'Male' : 'Female'} <Text>•</Text> {selectedAge}
+              {selectedGender === 'male' ? 'Male' : 'Female'} • {selectedAge}
             </Text>
           </View>
         </View>
@@ -74,7 +74,7 @@ export default function HomeScreen() {
         <View style={styles.instructionBanner}>
           <Brain size={20} color="#2563EB" />
           <Text style={styles.instructionText}>
-            Choose the area that best describes your main health concern
+            Choose the area that best describes your main concern
           </Text>
         </View>
 
@@ -113,9 +113,9 @@ export default function HomeScreen() {
             <Activity size={32} color="#059669" style={styles.activityIcon} />
           </View>
           <Text style={styles.title}>BodyCheck+</Text>
-          <Text style={styles.subtitle}>AI-Powered Health Assessment</Text>
+          <Text style={styles.subtitle}>AI Health Assessment</Text>
           <Text style={styles.description}>
-            Get personalized health insights using smart questions and advanced technology
+            Get personalized health insights using smart questions
           </Text>
         </View>
 
@@ -177,13 +177,13 @@ export default function HomeScreen() {
           <View style={styles.continueSection}>
             <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
               <Brain size={20} color="#FFFFFF" />
-              <Text style={styles.continueButtonText}>Start Health Assessment</Text>
+              <Text style={styles.continueButtonText}>Start Assessment</Text>
             </TouchableOpacity>
           </View>
         )}
 
         <View style={styles.featuresSection}>
-          <Text style={styles.featuresTitle}>What makes us different</Text>
+          <Text style={styles.featuresTitle}>Why choose us</Text>
           <View style={styles.featuresList}>
             <View style={styles.featureItem}>
               <Brain size={20} color="#2563EB" />
@@ -191,11 +191,11 @@ export default function HomeScreen() {
             </View>
             <View style={styles.featureItem}>
               <Activity size={20} color="#059669" />
-              <Text style={styles.featureText}>Easy-to-understand questions</Text>
+              <Text style={styles.featureText}>Easy questions</Text>
             </View>
             <View style={styles.featureItem}>
               <Stethoscope size={20} color="#7C3AED" />
-              <Text style={styles.featureText}>Professional-grade insights</Text>
+              <Text style={styles.featureText}>Professional insights</Text>
             </View>
           </View>
         </View>
@@ -203,8 +203,7 @@ export default function HomeScreen() {
         <View style={styles.disclaimer}>
           <Text style={styles.disclaimerText}>
             <Text style={styles.disclaimerTitle}>Important: </Text>
-            This app gives you health information but cannot replace a real doctor<Text>.</Text>
-            Always talk to a healthcare professional about your health concerns<Text>.</Text>
+            This app provides health information but cannot replace a doctor. Always consult healthcare professionals for medical concerns.
           </Text>
         </View>
       </ScrollView>

@@ -33,7 +33,7 @@ export default function SlideMenu({ visible, onClose, onNavigate }: SlideMenuPro
     {
       id: 'profile',
       title: 'Profile',
-      subtitle: 'Personal information and health history',
+      subtitle: 'Personal health info',
       icon: User,
       color: '#2563EB',
       onPress: () => {
@@ -43,8 +43,8 @@ export default function SlideMenu({ visible, onClose, onNavigate }: SlideMenuPro
     },
     {
       id: 'emergency',
-      title: 'Emergency Contacts',
-      subtitle: 'Quick access to emergency services',
+      title: 'Emergency',
+      subtitle: 'Quick emergency access',
       icon: Phone,
       color: '#DC2626',
       onPress: () => {
@@ -55,7 +55,7 @@ export default function SlideMenu({ visible, onClose, onNavigate }: SlideMenuPro
     {
       id: 'settings',
       title: 'Settings',
-      subtitle: 'App preferences and notifications',
+      subtitle: 'App preferences',
       icon: Settings,
       color: '#6B7280',
       onPress: () => {
@@ -65,8 +65,8 @@ export default function SlideMenu({ visible, onClose, onNavigate }: SlideMenuPro
     },
     {
       id: 'privacy',
-      title: 'Privacy Policy',
-      subtitle: 'How we protect your health data',
+      title: 'Privacy',
+      subtitle: 'Data protection',
       icon: Shield,
       color: '#059669',
       onPress: () => {
@@ -84,12 +84,6 @@ export default function SlideMenu({ visible, onClose, onNavigate }: SlideMenuPro
       onRequestClose={onClose}
     >
       <View style={styles.overlay}>
-        <TouchableOpacity 
-          style={styles.backdrop} 
-          activeOpacity={1} 
-          onPress={onClose}
-        />
-        
         <Animated.View 
           style={[
             styles.menuContainer,
@@ -103,8 +97,8 @@ export default function SlideMenu({ visible, onClose, onNavigate }: SlideMenuPro
             <View style={styles.profileImageContainer}>
               <User size={32} color="#FFFFFF" />
             </View>
-            <Text style={styles.profileName}>Your Health Profile</Text>
-            <Text style={styles.profileSubtitle}>Manage your health information</Text>
+            <Text style={styles.profileName}>Health Profile</Text>
+            <Text style={styles.profileSubtitle}>Manage your health data</Text>
           </View>
 
           {/* Menu Items */}
@@ -136,7 +130,7 @@ export default function SlideMenu({ visible, onClose, onNavigate }: SlideMenuPro
               <Info size={16} color="#6B7280" />
               <View style={styles.versionText}>
                 <Text style={styles.appName}>BodyCheck+</Text>
-                <Text style={styles.versionNumber}>Version 1.0.0</Text>
+                <Text style={styles.versionNumber}>v1.0.0</Text>
               </View>
             </View>
           </View>
@@ -146,6 +140,12 @@ export default function SlideMenu({ visible, onClose, onNavigate }: SlideMenuPro
             <X size={24} color="#6B7280" />
           </TouchableOpacity>
         </Animated.View>
+        
+        <TouchableOpacity 
+          style={styles.backdrop} 
+          activeOpacity={1} 
+          onPress={onClose}
+        />
       </View>
     </Modal>
   );

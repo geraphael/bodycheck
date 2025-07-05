@@ -20,18 +20,18 @@ const symptomCategories: SymptomCategory[] = [
   {
     id: 'neurological',
     name: 'Head & Brain',
-    description: 'Headaches, dizziness, memory problems',
+    description: 'Headaches, dizziness, memory issues',
     icon: Brain,
     color: '#7C3AED',
-    commonSymptoms: ['Headache', 'Dizziness', 'Memory issues', 'Confusion']
+    commonSymptoms: ['Headache', 'Dizziness', 'Memory issues']
   },
   {
     id: 'cardiovascular',
     name: 'Heart & Blood',
-    description: 'Chest pain, heart racing, circulation issues',
+    description: 'Chest pain, heart racing, circulation',
     icon: Heart,
     color: '#DC2626',
-    commonSymptoms: ['Chest pain', 'Heart racing', 'Shortness of breath', 'Swelling']
+    commonSymptoms: ['Chest pain', 'Heart racing', 'Shortness of breath']
   },
   {
     id: 'respiratory',
@@ -39,15 +39,15 @@ const symptomCategories: SymptomCategory[] = [
     description: 'Cough, breathing problems, chest tightness',
     icon: Lungs,
     color: '#0891B2',
-    commonSymptoms: ['Cough', 'Hard to breathe', 'Wheezing', 'Chest tightness']
+    commonSymptoms: ['Cough', 'Hard to breathe', 'Wheezing']
   },
   {
     id: 'gastrointestinal',
     name: 'Stomach & Digestion',
-    description: 'Stomach pain, nausea, bowel problems',
+    description: 'Stomach pain, nausea, bowel issues',
     icon: Stomach,
     color: '#059669',
-    commonSymptoms: ['Nausea', 'Vomiting', 'Diarrhea', 'Stomach pain']
+    commonSymptoms: ['Nausea', 'Vomiting', 'Stomach pain']
   },
   {
     id: 'musculoskeletal',
@@ -55,7 +55,7 @@ const symptomCategories: SymptomCategory[] = [
     description: 'Joint pain, muscle aches, stiffness',
     icon: Bone,
     color: '#D97706',
-    commonSymptoms: ['Joint pain', 'Muscle aches', 'Stiffness', 'Swelling']
+    commonSymptoms: ['Joint pain', 'Muscle aches', 'Stiffness']
   },
   {
     id: 'general',
@@ -63,7 +63,7 @@ const symptomCategories: SymptomCategory[] = [
     description: 'Fever, tiredness, weight changes',
     icon: Thermometer,
     color: '#F59E0B',
-    commonSymptoms: ['Fever', 'Tiredness', 'Weight loss', 'Night sweats']
+    commonSymptoms: ['Fever', 'Tiredness', 'Weight loss']
   },
   {
     id: 'dermatological',
@@ -71,7 +71,7 @@ const symptomCategories: SymptomCategory[] = [
     description: 'Rashes, itching, skin changes',
     icon: Droplets,
     color: '#EC4899',
-    commonSymptoms: ['Rash', 'Itching', 'Skin changes', 'Hair loss']
+    commonSymptoms: ['Rash', 'Itching', 'Skin changes']
   },
   {
     id: 'sensory',
@@ -79,7 +79,7 @@ const symptomCategories: SymptomCategory[] = [
     description: 'Vision problems, hearing issues',
     icon: Eye,
     color: '#8B5CF6',
-    commonSymptoms: ['Vision changes', 'Hearing loss', 'Eye pain', 'Ear pain']
+    commonSymptoms: ['Vision changes', 'Hearing loss', 'Eye pain']
   },
   {
     id: 'genitourinary',
@@ -87,7 +87,7 @@ const symptomCategories: SymptomCategory[] = [
     description: 'Bathroom problems, pelvic pain',
     icon: Users,
     color: '#06B6D4',
-    commonSymptoms: ['Bathroom changes', 'Pelvic pain', 'Discharge', 'Private area issues']
+    commonSymptoms: ['Bathroom changes', 'Pelvic pain', 'Discharge']
   },
   {
     id: 'pediatric',
@@ -95,7 +95,7 @@ const symptomCategories: SymptomCategory[] = [
     description: 'Issues specific to children',
     icon: Baby,
     color: '#10B981',
-    commonSymptoms: ['Crying', 'Eating problems', 'Sleep issues', 'Growth concerns']
+    commonSymptoms: ['Crying', 'Eating problems', 'Sleep issues']
   },
 ];
 
@@ -108,9 +108,6 @@ export default function SymptomCategorySelector({ gender, age, onCategoryPress }
       filtered = filtered.filter(cat => cat.id !== 'pediatric');
     }
     
-    // Add gender-specific filtering if needed
-    // This could be expanded based on medical requirements
-    
     return filtered;
   };
 
@@ -118,9 +115,9 @@ export default function SymptomCategorySelector({ gender, age, onCategoryPress }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>What area of your body needs attention?</Text>
+      <Text style={styles.title}>What area needs attention?</Text>
       <Text style={styles.subtitle}>
-        Pick the category that best matches what you're feeling
+        Pick the category that best matches your symptoms
       </Text>
       
       <View style={styles.categoriesGrid}>
@@ -141,7 +138,7 @@ export default function SymptomCategorySelector({ gender, age, onCategoryPress }
               <Text style={styles.categoryDescription}>{category.description}</Text>
               
               <View style={styles.symptomsPreview}>
-                <Text style={styles.symptomsLabel}>Common symptoms:</Text>
+                <Text style={styles.symptomsLabel}>Common:</Text>
                 <Text style={styles.symptomsText}>
                   {category.commonSymptoms.slice(0, 2).join(', ')}
                   {category.commonSymptoms.length > 2 ? '...' : ''}

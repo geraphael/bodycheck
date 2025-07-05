@@ -41,7 +41,7 @@ export default function EmergencyScreen() {
         <View style={styles.header}>
           <AlertTriangle size={32} color="#DC2626" />
           <Text style={styles.title}>Emergency Services</Text>
-          <Text style={styles.subtitle}>Get immediate help when you need it most</Text>
+          <Text style={styles.subtitle}>Get immediate help when needed</Text>
         </View>
 
         <View style={styles.emergencySection}>
@@ -75,7 +75,7 @@ export default function EmergencyScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>When to Call 911</Text>
           <Text style={styles.sectionSubtitle}>
-            Call immediately if you experience any of these symptoms:
+            Call immediately if you experience:
           </Text>
           
           <View style={styles.symptomsList}>
