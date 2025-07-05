@@ -1,15 +1,17 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useState } from 'react';
 import { router } from 'expo-router';
-import { User, Users, Brain, Stethoscope, Activity } from 'lucide-react-native';
+import { User, Users, Brain, Stethoscope, Activity, Menu } from 'lucide-react-native';
 import EmergencyButton from '@/components/EmergencyButton';
 import AgeSelector from '@/components/AgeSelector';
 import SymptomCategorySelector from '@/components/SymptomCategorySelector';
+import MenuModal from '@/components/MenuModal';
 
 export default function HomeScreen() {
   const [selectedGender, setSelectedGender] = useState<'male' | 'female' | null>(null);
   const [selectedAge, setSelectedAge] = useState<string>('');
   const [showSymptomCategories, setShowSymptomCategories] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
 
   const handleGenderSelect = (gender: 'male' | 'female') => {
     setSelectedGender(gender);
@@ -46,6 +48,10 @@ export default function HomeScreen() {
     setShowSymptomCategories(false);
   };
 
+  const handleMenuNavigate = (screen: string) => {
+    router.push(screen as any);
+  };
+
   if (showSymptomCategories) {
     return (
       <View style={styles.container}>
@@ -58,6 +64,9 @@ export default function HomeScreen() {
               {selectedGender === 'male' ? 'Male' : 'Female'} <Text>•</Text> {selectedAge}
             </Text>
           </View>
+          <TouchableOpacity style={styles.menuButton} onPress={() => setShowMenu(true)}>
+            <Menu size={24} color="#6B7280" />
+          </TouchableOpacity>
         </View>
 
         <View style={styles.instructionBanner}>
@@ -76,12 +85,25 @@ export default function HomeScreen() {
         </ScrollView>
 
         <EmergencyButton onPress={handleEmergencyPress} />
+        
+        <MenuModal
+          visible={showMenu}
+          onClose={() => setShowMenu(false)}
+          onNavigate={handleMenuNavigate}
+        />
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
+      <View style={styles.topBar}>
+        <View style={styles.topBarSpacer} />
+        <TouchableOpacity style={styles.menuButton} onPress={() => setShowMenu(true)}>
+          <Menu size={24} color="#6B7280" />
+        </TouchableOpacity>
+      </View>
+
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View style={styles.logoContainer}>
@@ -186,6 +208,12 @@ export default function HomeScreen() {
       </ScrollView>
 
       <EmergencyButton onPress={handleEmergencyPress} />
+      
+      <MenuModal
+        visible={showMenu}
+        onClose={() => setShowMenu(false)}
+        onNavigate={handleMenuNavigate}
+      />
     </View>
   );
 }
@@ -195,13 +223,34 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8FAFC',
   },
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+  },
+  topBarSpacer: {
+    width: 24,
+  },
+  menuButton: {
+    padding: 8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
   scrollView: {
     flex: 1,
     paddingHorizontal: 20,
   },
   header: {
     alignItems: 'center',
-    paddingTop: 60,
+    paddingTop: 20,
     paddingBottom: 30,
   },
   logoContainer: {
