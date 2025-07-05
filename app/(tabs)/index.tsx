@@ -55,7 +55,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
           <View style={styles.selectionInfo}>
             <Text style={styles.selectionText}>
-              {selectedGender === 'male' ? 'Male' : 'Female'} • {selectedAge}
+              {selectedGender === 'male' ? 'Male' : 'Female'} <Text>•</Text> {selectedAge}
             </Text>
           </View>
         </View>
@@ -186,8 +186,8 @@ export default function HomeScreen() {
         <View style={styles.disclaimer}>
           <Text style={styles.disclaimerText}>
             <Text style={styles.disclaimerTitle}>Medical Disclaimer: </Text>
-            This app provides AI-generated health insights and should not replace professional medical advice. 
-            Always consult with a healthcare provider for medical concerns.
+            This app provides AI-generated health insights and should not replace professional medical advice{<Text>.</Text>}
+            Always consult with a healthcare provider for medical concerns{<Text>.</Text>}
           </Text>
         </View>
       </ScrollView>
