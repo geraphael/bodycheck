@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { router } from 'expo-router';
-import { ChevronLeft, Heart, Home, Building2, User } from 'lucide-react-native';
+import { ChevronLeft, Heart, Chrome as Home, Building2, User } from 'lucide-react-native';
 
 export default function DiagnosisScreen() {
   return (
