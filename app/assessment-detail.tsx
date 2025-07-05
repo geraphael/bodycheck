@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { ChevronLeft, Calendar, Clock, Brain, AlertCircle, User, Activity } from 'lucide-react-native';
+import { ChevronLeft, Calendar, Clock, Brain, CircleAlert as AlertCircle, User, Activity } from 'lucide-react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { AssessmentData } from '@/utils/storage';
 
