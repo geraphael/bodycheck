@@ -1,21 +1,22 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Image } from 'react-native';
 import { useState, useEffect } from 'react';
 import { router } from 'expo-router';
-import { User, Users, Brain, Stethoscope, Activity, Menu, ArrowRight, Plus, Clock, TrendingUp } from 'lucide-react-native';
-import EmergencyButton from '@/components/EmergencyButton';
+import { User, Users, Brain, Menu, ArrowRight, Clock } from 'lucide-react-native';
 import AgeSelector from '@/components/AgeSelector';
 import SymptomCategorySelector from '@/components/SymptomCategorySelector';
 import SlideMenu from '@/components/SlideMenu';
 import SwipeableTabIndicator from '@/components/SwipeableTabIndicator';
 import SwipeGestureIndicator from '@/components/SwipeGestureIndicator';
+import { useSwipeNavigation } from '@/components/SwipeNavigationProvider';
 
 export default function HomeScreen() {
   const [selectedGender, setSelectedGender] = useState<'male' | 'female' | null>(null);
   const [selectedAge, setSelectedAge] = useState<string>('');
   const [showSymptomCategories, setShowSymptomCategories] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
   const [showSwipeIndicator, setShowSwipeIndicator] = useState(false);
   const [showGestureHint, setShowGestureHint] = useState(false);
+  
+  const { openMenu, closeMenu, isMenuOpen } = useSwipeNavigation();
 
   useEffect(() => {
     // Show swipe indicator on first load
@@ -52,17 +53,6 @@ export default function HomeScreen() {
     router.push(`/assessment/${category}?gender=${selectedGender}&age=${selectedAge}`);
   };
 
-  const handleEmergencyPress = () => {
-    Alert.alert(
-      'Emergency Assistance',
-      'Are you experiencing a medical emergency?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Call 911', onPress: () => router.push('/emergency') },
-      ]
-    );
-  };
-
   const handleReset = () => {
     setSelectedGender(null);
     setSelectedAge('');
@@ -77,7 +67,7 @@ export default function HomeScreen() {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity style={styles.menuButton} onPress={() => setShowMenu(true)}>
+          <TouchableOpacity style={styles.menuButton} onPress={openMenu}>
             <Menu size={24} color="#6B7280" />
           </TouchableOpacity>
           
@@ -140,8 +130,8 @@ export default function HomeScreen() {
         </ScrollView>
 
         <SlideMenu
-          visible={showMenu}
-          onClose={() => setShowMenu(false)}
+          visible={isMenuOpen}
+          onClose={closeMenu}
           onNavigate={handleMenuNavigate}
         />
 
@@ -159,7 +149,7 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.menuButton} onPress={() => setShowMenu(true)}>
+        <TouchableOpacity style={styles.menuButton} onPress={openMenu}>
           <Menu size={24} color="#6B7280" />
         </TouchableOpacity>
         
@@ -289,8 +279,8 @@ export default function HomeScreen() {
       </ScrollView>
 
       <SlideMenu
-        visible={showMenu}
-        onClose={() => setShowMenu(false)}
+        visible={isMenuOpen}
+        onClose={closeMenu}
         onNavigate={handleMenuNavigate}
       />
 

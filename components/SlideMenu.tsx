@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, Modal } from 'react-native';
 import { User, Phone, Settings, Shield, Info, X } from 'lucide-react-native';
 import Animated, {
   useSharedValue,
@@ -91,7 +91,7 @@ export default function SlideMenu({ visible, onClose, onNavigate }: SlideMenuPro
       icon: Phone,
       color: '#DC2626',
       onPress: () => {
-        onNavigate('/emergency');
+        onNavigate('/(tabs)/emergency');
         onClose();
       }
     },
@@ -127,93 +127,92 @@ export default function SlideMenu({ visible, onClose, onNavigate }: SlideMenuPro
   const backdropAnimatedStyle = useAnimatedStyle(() => {
     return {
       opacity: backdropOpacity.value,
-      pointerEvents: backdropOpacity.value > 0 ? 'auto' : 'none',
     };
   });
 
-  if (!visible) return null;
-
   return (
-    <View style={styles.overlay}>
-      {/* Backdrop */}
-      <TouchableOpacity 
-        style={StyleSheet.absoluteFill}
-        activeOpacity={1} 
-        onPress={onClose}
-      >
-        <Animated.View style={[styles.backdrop, backdropAnimatedStyle]} />
-      </TouchableOpacity>
-      
-      {/* Menu */}
-      <GestureDetector gesture={panGesture}>
-        <Animated.View style={[styles.menuContainer, menuAnimatedStyle]}>
-          {/* Profile Section */}
-          <View style={styles.profileSection}>
-            <View style={styles.profileImageContainer}>
-              <User size={32} color="#FFFFFF" />
+    <Modal
+      visible={visible}
+      transparent
+      animationType="none"
+      onRequestClose={onClose}
+    >
+      <View style={styles.overlay}>
+        {/* Backdrop */}
+        <TouchableOpacity 
+          style={StyleSheet.absoluteFill}
+          activeOpacity={1} 
+          onPress={onClose}
+        >
+          <Animated.View style={[styles.backdrop, backdropAnimatedStyle]} />
+        </TouchableOpacity>
+        
+        {/* Menu */}
+        <GestureDetector gesture={panGesture}>
+          <Animated.View style={[styles.menuContainer, menuAnimatedStyle]}>
+            {/* Profile Section */}
+            <View style={styles.profileSection}>
+              <View style={styles.profileImageContainer}>
+                <User size={32} color="#FFFFFF" />
+              </View>
+              <Text style={styles.profileName}>Health Profile</Text>
+              <Text style={styles.profileSubtitle}>Manage your health data</Text>
             </View>
-            <Text style={styles.profileName}>Health Profile</Text>
-            <Text style={styles.profileSubtitle}>Manage your health data</Text>
-          </View>
 
-          {/* Menu Items */}
-          <ScrollView style={styles.menuContent} showsVerticalScrollIndicator={false}>
-            {menuItems.map((item) => {
-              const IconComponent = item.icon;
-              return (
-                <TouchableOpacity
-                  key={item.id}
-                  style={styles.menuItem}
-                  onPress={item.onPress}
-                  activeOpacity={0.7}
-                >
-                  <View style={[styles.iconContainer, { backgroundColor: `${item.color}15` }]}>
-                    <IconComponent size={20} color={item.color} />
-                  </View>
-                  <View style={styles.itemContent}>
-                    <Text style={styles.itemTitle}>{item.title}</Text>
-                    <Text style={styles.itemSubtitle}>{item.subtitle}</Text>
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
+            {/* Menu Items */}
+            <ScrollView style={styles.menuContent} showsVerticalScrollIndicator={false}>
+              {menuItems.map((item) => {
+                const IconComponent = item.icon;
+                return (
+                  <TouchableOpacity
+                    key={item.id}
+                    style={styles.menuItem}
+                    onPress={item.onPress}
+                    activeOpacity={0.7}
+                  >
+                    <View style={[styles.iconContainer, { backgroundColor: `${item.color}15` }]}>
+                      <IconComponent size={20} color={item.color} />
+                    </View>
+                    <View style={styles.itemContent}>
+                      <Text style={styles.itemTitle}>{item.title}</Text>
+                      <Text style={styles.itemSubtitle}>{item.subtitle}</Text>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
 
-          {/* Footer */}
-          <View style={styles.footer}>
-            <View style={styles.versionInfo}>
-              <Info size={16} color="#6B7280" />
-              <View style={styles.versionText}>
-                <Text style={styles.appName}>BodyCheck+</Text>
-                <Text style={styles.versionNumber}>v1.0.0</Text>
+            {/* Footer */}
+            <View style={styles.footer}>
+              <View style={styles.versionInfo}>
+                <Info size={16} color="#6B7280" />
+                <View style={styles.versionText}>
+                  <Text style={styles.appName}>BodyCheck+</Text>
+                  <Text style={styles.versionNumber}>v1.0.0</Text>
+                </View>
               </View>
             </View>
-          </View>
 
-          {/* Close Button */}
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <X size={24} color="#6B7280" />
-          </TouchableOpacity>
+            {/* Close Button */}
+            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+              <X size={24} color="#6B7280" />
+            </TouchableOpacity>
 
-          {/* Swipe Indicator */}
-          <View style={styles.swipeIndicator}>
-            <View style={styles.swipeHandle} />
-            <Text style={styles.swipeText}>Swipe left to close</Text>
-          </View>
-        </Animated.View>
-      </GestureDetector>
-    </View>
+            {/* Swipe Indicator */}
+            <View style={styles.swipeIndicator}>
+              <View style={styles.swipeHandle} />
+              <Text style={styles.swipeText}>Swipe left to close</Text>
+            </View>
+          </Animated.View>
+        </GestureDetector>
+      </View>
+    </Modal>
   );
 }
 
 const styles = StyleSheet.create({
   overlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 1000,
+    flex: 1,
   },
   backdrop: {
     flex: 1,

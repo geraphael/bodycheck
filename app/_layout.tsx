@@ -10,7 +10,7 @@ import {
   Inter_700Bold
 } from '@expo-google-fonts/inter';
 import * as SplashScreen from 'expo-splash-screen';
-import SwipeNavigationProvider from '@/components/SwipeNavigationProvider';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -35,17 +35,19 @@ export default function RootLayout() {
   }
 
   return (
-    <SwipeNavigationProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="splash" />
         <Stack.Screen name="auth" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="assessment/[category]" />
+        <Stack.Screen name="assessment/symptom-checker" />
+        <Stack.Screen name="assessment/diagnosis" />
         <Stack.Screen name="results" />
         <Stack.Screen name="emergency" />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />
-    </SwipeNavigationProvider>
+    </GestureHandlerRootView>
   );
 }
