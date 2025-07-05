@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
-import { ChevronLeft, Calendar, Clock, Brain, TrendingUp, FileText, AlertCircle } from 'lucide-react-native';
+import { ChevronLeft, Calendar, Clock, Brain, TrendingUp, FileText, CircleAlert as AlertCircle } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { getAssessmentHistory, AssessmentData } from '@/utils/storage';
 
