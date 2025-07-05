@@ -5,7 +5,7 @@ import { User, Users, Brain, Stethoscope, Activity, Menu } from 'lucide-react-na
 import EmergencyButton from '@/components/EmergencyButton';
 import AgeSelector from '@/components/AgeSelector';
 import SymptomCategorySelector from '@/components/SymptomCategorySelector';
-import MenuModal from '@/components/MenuModal';
+import SlideMenu from '@/components/SlideMenu';
 
 export default function HomeScreen() {
   const [selectedGender, setSelectedGender] = useState<'male' | 'female' | null>(null);
@@ -56,17 +56,19 @@ export default function HomeScreen() {
     return (
       <View style={styles.container}>
         <View style={styles.categoryHeader}>
+          <TouchableOpacity style={styles.menuButton} onPress={() => setShowMenu(true)}>
+            <Menu size={24} color="#6B7280" />
+          </TouchableOpacity>
+          
           <TouchableOpacity style={styles.backButton} onPress={handleReset}>
             <Text style={styles.backButtonText}>← Back to Selection</Text>
           </TouchableOpacity>
+          
           <View style={styles.selectionInfo}>
             <Text style={styles.selectionText}>
               {selectedGender === 'male' ? 'Male' : 'Female'} <Text>•</Text> {selectedAge}
             </Text>
           </View>
-          <TouchableOpacity style={styles.menuButton} onPress={() => setShowMenu(true)}>
-            <Menu size={24} color="#6B7280" />
-          </TouchableOpacity>
         </View>
 
         <View style={styles.instructionBanner}>
@@ -86,7 +88,7 @@ export default function HomeScreen() {
 
         <EmergencyButton onPress={handleEmergencyPress} />
         
-        <MenuModal
+        <SlideMenu
           visible={showMenu}
           onClose={() => setShowMenu(false)}
           onNavigate={handleMenuNavigate}
@@ -98,10 +100,10 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.topBar}>
-        <View style={styles.topBarSpacer} />
         <TouchableOpacity style={styles.menuButton} onPress={() => setShowMenu(true)}>
           <Menu size={24} color="#6B7280" />
         </TouchableOpacity>
+        <View style={styles.topBarSpacer} />
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
@@ -209,7 +211,7 @@ export default function HomeScreen() {
 
       <EmergencyButton onPress={handleEmergencyPress} />
       
-      <MenuModal
+      <SlideMenu
         visible={showMenu}
         onClose={() => setShowMenu(false)}
         onNavigate={handleMenuNavigate}
@@ -379,11 +381,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    flex: 1,
+    marginHorizontal: 12,
   },
   backButtonText: {
     fontSize: 14,
     fontFamily: 'Inter-SemiBold',
     color: '#2563EB',
+    textAlign: 'center',
   },
   selectionInfo: {
     backgroundColor: '#FFFFFF',
