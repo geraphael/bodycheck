@@ -1,17 +1,38 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { router } from 'expo-router';
 import { User, Users, Brain, Stethoscope, Activity, Menu } from 'lucide-react-native';
 import EmergencyButton from '@/components/EmergencyButton';
 import AgeSelector from '@/components/AgeSelector';
 import SymptomCategorySelector from '@/components/SymptomCategorySelector';
 import SlideMenu from '@/components/SlideMenu';
+import SwipeableTabIndicator from '@/components/SwipeableTabIndicator';
+import SwipeGestureIndicator from '@/components/SwipeGestureIndicator';
 
 export default function HomeScreen() {
   const [selectedGender, setSelectedGender] = useState<'male' | 'female' | null>(null);
   const [selectedAge, setSelectedAge] = useState<string>('');
   const [showSymptomCategories, setShowSymptomCategories] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [showSwipeIndicator, setShowSwipeIndicator] = useState(false);
+  const [showGestureHint, setShowGestureHint] = useState(false);
+
+  useEffect(() => {
+    // Show swipe indicator on first load
+    const timer = setTimeout(() => {
+      setShowSwipeIndicator(true);
+    }, 1000);
+
+    // Show gesture hint after a delay
+    const gestureTimer = setTimeout(() => {
+      setShowGestureHint(true);
+    }, 3000);
+
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(gestureTimer);
+    };
+  }, []);
 
   const handleGenderSelect = (gender: 'male' | 'female') => {
     setSelectedGender(gender);
@@ -92,6 +113,14 @@ export default function HomeScreen() {
           visible={showMenu}
           onClose={() => setShowMenu(false)}
           onNavigate={handleMenuNavigate}
+        />
+
+        <SwipeableTabIndicator visible={showSwipeIndicator} />
+        
+        <SwipeGestureIndicator
+          type="tab-navigation"
+          visible={showGestureHint}
+          onComplete={() => setShowGestureHint(false)}
         />
       </View>
     );
@@ -214,6 +243,14 @@ export default function HomeScreen() {
         visible={showMenu}
         onClose={() => setShowMenu(false)}
         onNavigate={handleMenuNavigate}
+      />
+
+      <SwipeableTabIndicator visible={showSwipeIndicator} />
+      
+      <SwipeGestureIndicator
+        type="menu-open"
+        visible={showGestureHint}
+        onComplete={() => setShowGestureHint(false)}
       />
     </View>
   );

@@ -1,6 +1,14 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView, Animated, Dimensions } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import { User, Phone, Settings, Shield, Info, X } from 'lucide-react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  interpolate,
+  Extrapolate,
+} from 'react-native-reanimated';
+import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 
 interface SlideMenuProps {
   visible: boolean;
@@ -11,23 +19,58 @@ interface SlideMenuProps {
 const { width: screenWidth } = Dimensions.get('window');
 
 export default function SlideMenu({ visible, onClose, onNavigate }: SlideMenuProps) {
-  const slideAnim = React.useRef(new Animated.Value(-screenWidth * 0.8)).current;
+  const translateX = useSharedValue(-screenWidth * 0.8);
+  const backdropOpacity = useSharedValue(0);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (visible) {
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
+      translateX.value = withSpring(0, {
+        damping: 20,
+        stiffness: 90,
+      });
+      backdropOpacity.value = withSpring(0.5, {
+        damping: 20,
+        stiffness: 90,
+      });
     } else {
-      Animated.timing(slideAnim, {
-        toValue: -screenWidth * 0.8,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
+      translateX.value = withSpring(-screenWidth * 0.8, {
+        damping: 20,
+        stiffness: 90,
+      });
+      backdropOpacity.value = withSpring(0, {
+        damping: 20,
+        stiffness: 90,
+      });
     }
-  }, [visible, slideAnim]);
+  }, [visible]);
+
+  // Swipe gesture to close menu
+  const panGesture = Gesture.Pan()
+    .onUpdate((event) => {
+      if (event.translationX < 0) {
+        const progress = Math.max(event.translationX / (-screenWidth * 0.8), -1);
+        translateX.value = interpolate(
+          Math.abs(progress),
+          [0, 1],
+          [0, -screenWidth * 0.8],
+          Extrapolate.CLAMP
+        );
+        backdropOpacity.value = interpolate(
+          Math.abs(progress),
+          [0, 1],
+          [0.5, 0],
+          Extrapolate.CLAMP
+        );
+      }
+    })
+    .onEnd((event) => {
+      if (event.translationX < -screenWidth * 0.2 || event.velocityX < -500) {
+        onClose();
+      } else {
+        translateX.value = withSpring(0);
+        backdropOpacity.value = withSpring(0.5);
+      }
+    });
 
   const menuItems = [
     {
@@ -37,7 +80,7 @@ export default function SlideMenu({ visible, onClose, onNavigate }: SlideMenuPro
       icon: User,
       color: '#2563EB',
       onPress: () => {
-        onNavigate('/(tabs)/settings');
+        onNavigate('/(tabs)/profile');
         onClose();
       }
     },
@@ -59,7 +102,7 @@ export default function SlideMenu({ visible, onClose, onNavigate }: SlideMenuPro
       icon: Settings,
       color: '#6B7280',
       onPress: () => {
-        onNavigate('/(tabs)/settings');
+        onNavigate('/(tabs)/profile');
         onClose();
       }
     },
@@ -70,28 +113,40 @@ export default function SlideMenu({ visible, onClose, onNavigate }: SlideMenuPro
       icon: Shield,
       color: '#059669',
       onPress: () => {
-        // In a real app, this would navigate to privacy policy
         onClose();
       }
     }
   ];
 
+  const menuAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: translateX.value }],
+    };
+  });
+
+  const backdropAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: backdropOpacity.value,
+      pointerEvents: backdropOpacity.value > 0 ? 'auto' : 'none',
+    };
+  });
+
+  if (!visible) return null;
+
   return (
-    <Modal
-      visible={visible}
-      animationType="none"
-      transparent={true}
-      onRequestClose={onClose}
-    >
-      <View style={styles.overlay}>
-        <Animated.View 
-          style={[
-            styles.menuContainer,
-            {
-              transform: [{ translateX: slideAnim }]
-            }
-          ]}
-        >
+    <View style={styles.overlay}>
+      {/* Backdrop */}
+      <TouchableOpacity 
+        style={StyleSheet.absoluteFill}
+        activeOpacity={1} 
+        onPress={onClose}
+      >
+        <Animated.View style={[styles.backdrop, backdropAnimatedStyle]} />
+      </TouchableOpacity>
+      
+      {/* Menu */}
+      <GestureDetector gesture={panGesture}>
+        <Animated.View style={[styles.menuContainer, menuAnimatedStyle]}>
           {/* Profile Section */}
           <View style={styles.profileSection}>
             <View style={styles.profileImageContainer}>
@@ -139,29 +194,37 @@ export default function SlideMenu({ visible, onClose, onNavigate }: SlideMenuPro
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
             <X size={24} color="#6B7280" />
           </TouchableOpacity>
+
+          {/* Swipe Indicator */}
+          <View style={styles.swipeIndicator}>
+            <View style={styles.swipeHandle} />
+            <Text style={styles.swipeText}>Swipe left to close</Text>
+          </View>
         </Animated.View>
-        
-        <TouchableOpacity 
-          style={styles.backdrop} 
-          activeOpacity={1} 
-          onPress={onClose}
-        />
-      </View>
-    </Modal>
+      </GestureDetector>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   overlay: {
-    flex: 1,
-    flexDirection: 'row',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1000,
   },
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: '#000000',
   },
   menuContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
     width: screenWidth * 0.8,
+    height: '100%',
     backgroundColor: '#FFFFFF',
     shadowColor: '#000',
     shadowOffset: { width: 2, height: 0 },
@@ -263,5 +326,28 @@ const styles = StyleSheet.create({
     padding: 8,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: 20,
+  },
+  swipeIndicator: {
+    position: 'absolute',
+    right: 0,
+    top: '50%',
+    transform: [{ translateY: -20 }],
+    alignItems: 'center',
+    paddingHorizontal: 8,
+  },
+  swipeHandle: {
+    width: 4,
+    height: 40,
+    backgroundColor: '#E5E7EB',
+    borderRadius: 2,
+    marginBottom: 8,
+  },
+  swipeText: {
+    fontSize: 10,
+    fontFamily: 'Inter-Regular',
+    color: '#9CA3AF',
+    transform: [{ rotate: '90deg' }],
+    width: 80,
+    textAlign: 'center',
   },
 });
