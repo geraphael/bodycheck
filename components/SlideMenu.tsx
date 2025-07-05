@@ -37,7 +37,7 @@ export default function SlideMenu({ visible, onClose, onNavigate }: SlideMenuPro
       icon: User,
       color: '#2563EB',
       onPress: () => {
-        onNavigate('/(tabs)/settings');
+        onNavigate('/(tabs)/profile');
         onClose();
       }
     },
@@ -70,7 +70,7 @@ export default function SlideMenu({ visible, onClose, onNavigate }: SlideMenuPro
       icon: Shield,
       color: '#059669',
       onPress: () => {
-        // In a real app, this would navigate to privacy policy
+        onNavigate('/privacy');
         onClose();
       }
     }

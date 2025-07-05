@@ -1,7 +1,15 @@
 import { Tabs } from 'expo-router';
-import { User, MapPin, Heart, CircleUser as UserCircle } from 'lucide-react-native';
+import { User, MapPin, Heart, CircleUser as UserCircle, Settings } from 'lucide-react-native';
+import { Platform } from 'react-native';
+import { useRef } from 'react';
 
 export default function TabLayout() {
+  const currentTabIndex = useRef(0);
+
+  const handleTabPress = (index: number) => {
+    currentTabIndex.current = index;
+  };
+
   return (
     <Tabs
       screenOptions={{
@@ -12,8 +20,8 @@ export default function TabLayout() {
           backgroundColor: '#FFFFFF',
           borderTopWidth: 1,
           borderTopColor: '#E5E7EB',
-          height: 90,
-          paddingBottom: 20,
+          height: Platform.OS === 'ios' ? 90 : 70,
+          paddingBottom: Platform.OS === 'ios' ? 20 : 10,
           paddingTop: 10,
         },
         tabBarLabelStyle: {
@@ -29,6 +37,9 @@ export default function TabLayout() {
             <User size={size} color={color} />
           ),
         }}
+        listeners={{
+          tabPress: () => handleTabPress(0),
+        }}
       />
       <Tabs.Screen
         name="hospitals"
@@ -37,6 +48,9 @@ export default function TabLayout() {
           tabBarIcon: ({ size, color }) => (
             <MapPin size={size} color={color} />
           ),
+        }}
+        listeners={{
+          tabPress: () => handleTabPress(1),
         }}
       />
       <Tabs.Screen
@@ -47,6 +61,9 @@ export default function TabLayout() {
             <Heart size={size} color={color} />
           ),
         }}
+        listeners={{
+          tabPress: () => handleTabPress(2),
+        }}
       />
       <Tabs.Screen
         name="profile"
@@ -55,6 +72,21 @@ export default function TabLayout() {
           tabBarIcon: ({ size, color }) => (
             <UserCircle size={size} color={color} />
           ),
+        }}
+        listeners={{
+          tabPress: () => handleTabPress(3),
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: 'Settings',
+          tabBarIcon: ({ size, color }) => (
+            <Settings size={size} color={color} />
+          ),
+        }}
+        listeners={{
+          tabPress: () => handleTabPress(4),
         }}
       />
     </Tabs>

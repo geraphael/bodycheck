@@ -40,6 +40,9 @@ export default function RootLayout() {
         <Stack.Screen name="auth" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="assessment/[category]" />
+        <Stack.Screen name="assessment-history" />
+        <Stack.Screen name="assessment-detail" />
+        <Stack.Screen name="privacy" />
         <Stack.Screen name="results" />
         <Stack.Screen name="emergency" />
         <Stack.Screen name="+not-found" />

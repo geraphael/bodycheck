@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, PanGestureHandler, State } from 'react-native';
 import { useState } from 'react';
 import { router } from 'expo-router';
 import { User, Users, Brain, Stethoscope, Activity, Menu } from 'lucide-react-native';
@@ -6,12 +6,50 @@ import EmergencyButton from '@/components/EmergencyButton';
 import AgeSelector from '@/components/AgeSelector';
 import SymptomCategorySelector from '@/components/SymptomCategorySelector';
 import SlideMenu from '@/components/SlideMenu';
+import Animated, {
+  useSharedValue,
+  useAnimatedGestureHandler,
+  useAnimatedStyle,
+  withSpring,
+  runOnJS,
+} from 'react-native-reanimated';
 
 export default function HomeScreen() {
   const [selectedGender, setSelectedGender] = useState<'male' | 'female' | null>(null);
   const [selectedAge, setSelectedAge] = useState<string>('');
   const [showSymptomCategories, setShowSymptomCategories] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+
+  const translateX = useSharedValue(0);
+
+  const gestureHandler = useAnimatedGestureHandler({
+    onStart: (_, context) => {
+      context.startX = translateX.value;
+    },
+    onActive: (event, context) => {
+      translateX.value = context.startX + event.translationX;
+    },
+    onEnd: (event) => {
+      const threshold = 100;
+      
+      if (event.translationX > threshold) {
+        // Swipe right - navigate to previous tab (none in this case)
+        translateX.value = withSpring(0);
+      } else if (event.translationX < -threshold) {
+        // Swipe left - navigate to next tab (hospitals)
+        runOnJS(() => router.push('/(tabs)/hospitals'))();
+        translateX.value = withSpring(0);
+      } else {
+        translateX.value = withSpring(0);
+      }
+    },
+  });
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: translateX.value }],
+    };
+  });
 
   const handleGenderSelect = (gender: 'male' | 'female') => {
     setSelectedGender(gender);
@@ -54,36 +92,161 @@ export default function HomeScreen() {
 
   if (showSymptomCategories) {
     return (
-      <View style={styles.container}>
-        <View style={styles.categoryHeader}>
+      <PanGestureHandler onGestureEvent={gestureHandler}>
+        <Animated.View style={[styles.container, animatedStyle]}>
+          <View style={styles.categoryHeader}>
+            <TouchableOpacity style={styles.menuButton} onPress={() => setShowMenu(true)}>
+              <Menu size={24} color="#6B7280" />
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.backButton} onPress={handleReset}>
+              <Text style={styles.backButtonText}>← Back</Text>
+            </TouchableOpacity>
+            
+            <View style={styles.selectionInfo}>
+              <Text style={styles.selectionText}>
+                {selectedGender === 'male' ? 'Male' : 'Female'} • {selectedAge}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.instructionBanner}>
+            <Brain size={20} color="#2563EB" />
+            <Text style={styles.instructionText}>
+              Choose the area that best describes your main concern
+            </Text>
+          </View>
+
+          <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+            <SymptomCategorySelector
+              gender={selectedGender}
+              age={selectedAge}
+              onCategoryPress={handleSymptomCategoryPress}
+            />
+          </ScrollView>
+
+          <EmergencyButton onPress={handleEmergencyPress} />
+          
+          <SlideMenu
+            visible={showMenu}
+            onClose={() => setShowMenu(false)}
+            onNavigate={handleMenuNavigate}
+          />
+        </Animated.View>
+      </PanGestureHandler>
+    );
+  }
+
+  return (
+    <PanGestureHandler onGestureEvent={gestureHandler}>
+      <Animated.View style={[styles.container, animatedStyle]}>
+        <View style={styles.topBar}>
           <TouchableOpacity style={styles.menuButton} onPress={() => setShowMenu(true)}>
             <Menu size={24} color="#6B7280" />
           </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.backButton} onPress={handleReset}>
-            <Text style={styles.backButtonText}>← Back</Text>
-          </TouchableOpacity>
-          
-          <View style={styles.selectionInfo}>
-            <Text style={styles.selectionText}>
-              {selectedGender === 'male' ? 'Male' : 'Female'} • {selectedAge}
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.instructionBanner}>
-          <Brain size={20} color="#2563EB" />
-          <Text style={styles.instructionText}>
-            Choose the area that best describes your main concern
-          </Text>
+          <View style={styles.topBarSpacer} />
         </View>
 
         <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-          <SymptomCategorySelector
-            gender={selectedGender}
-            age={selectedAge}
-            onCategoryPress={handleSymptomCategoryPress}
-          />
+          <View style={styles.header}>
+            <View style={styles.logoContainer}>
+              <Stethoscope size={32} color="#2563EB" />
+              <Activity size={24} color="#059669" style={styles.activityIcon} />
+            </View>
+            <Text style={styles.title}>BodyCheck+</Text>
+            <Text style={styles.subtitle}>AI Health Assessment</Text>
+            <Text style={styles.description}>
+              Get personalized health insights using smart questions
+            </Text>
+          </View>
+
+          <View style={styles.selectionSection}>
+            <Text style={styles.sectionTitle}>Tell us about yourself</Text>
+            <Text style={styles.sectionSubtitle}>Choose your gender</Text>
+            <View style={styles.genderSelector}>
+              <TouchableOpacity
+                style={[
+                  styles.genderCard,
+                  selectedGender === 'male' && styles.genderCardActive
+                ]}
+                onPress={() => handleGenderSelect('male')}
+              >
+                <View style={[
+                  styles.genderIconContainer,
+                  selectedGender === 'male' && styles.genderIconContainerActive
+                ]}>
+                  <User size={20} color={selectedGender === 'male' ? '#FFFFFF' : '#2563EB'} />
+                </View>
+                <Text style={[
+                  styles.genderText,
+                  selectedGender === 'male' && styles.genderTextActive
+                ]}>Male</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.genderCard,
+                  selectedGender === 'female' && styles.genderCardActive
+                ]}
+                onPress={() => handleGenderSelect('female')}
+              >
+                <View style={[
+                  styles.genderIconContainer,
+                  selectedGender === 'female' && styles.genderIconContainerActive
+                ]}>
+                  <Users size={20} color={selectedGender === 'female' ? '#FFFFFF' : '#2563EB'} />
+                </View>
+                <Text style={[
+                  styles.genderText,
+                  selectedGender === 'female' && styles.genderTextActive
+                ]}>Female</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {selectedGender && (
+            <View style={styles.selectionSection}>
+              <Text style={styles.sectionTitle}>What's your age range?</Text>
+              <AgeSelector
+                selectedAge={selectedAge}
+                onAgeSelect={handleAgeSelect}
+              />
+            </View>
+          )}
+
+          {selectedGender && selectedAge && (
+            <View style={styles.continueSection}>
+              <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
+                <Brain size={20} color="#FFFFFF" />
+                <Text style={styles.continueButtonText}>Start Assessment</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          <View style={styles.featuresSection}>
+            <Text style={styles.featuresTitle}>Why choose us</Text>
+            <View style={styles.featuresList}>
+              <View style={styles.featureItem}>
+                <Brain size={20} color="#2563EB" />
+                <Text style={styles.featureText}>Smart symptom analysis</Text>
+              </View>
+              <View style={styles.featureItem}>
+                <Activity size={20} color="#059669" />
+                <Text style={styles.featureText}>Easy questions</Text>
+              </View>
+              <View style={styles.featureItem}>
+                <Stethoscope size={20} color="#7C3AED" />
+                <Text style={styles.featureText}>Professional insights</Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.disclaimer}>
+            <Text style={styles.disclaimerText}>
+              <Text style={styles.disclaimerTitle}>Important: </Text>
+              This app provides health information but cannot replace a doctor. Always consult healthcare professionals for medical concerns.
+            </Text>
+          </View>
         </ScrollView>
 
         <EmergencyButton onPress={handleEmergencyPress} />
@@ -93,129 +256,8 @@ export default function HomeScreen() {
           onClose={() => setShowMenu(false)}
           onNavigate={handleMenuNavigate}
         />
-      </View>
-    );
-  }
-
-  return (
-    <View style={styles.container}>
-      <View style={styles.topBar}>
-        <TouchableOpacity style={styles.menuButton} onPress={() => setShowMenu(true)}>
-          <Menu size={24} color="#6B7280" />
-        </TouchableOpacity>
-        <View style={styles.topBarSpacer} />
-      </View>
-
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <View style={styles.logoContainer}>
-            <Stethoscope size={40} color="#2563EB" />
-            <Activity size={32} color="#059669" style={styles.activityIcon} />
-          </View>
-          <Text style={styles.title}>BodyCheck+</Text>
-          <Text style={styles.subtitle}>AI Health Assessment</Text>
-          <Text style={styles.description}>
-            Get personalized health insights using smart questions
-          </Text>
-        </View>
-
-        <View style={styles.selectionSection}>
-          <Text style={styles.sectionTitle}>Tell us about yourself</Text>
-          <Text style={styles.sectionSubtitle}>Choose your gender</Text>
-          <View style={styles.genderSelector}>
-            <TouchableOpacity
-              style={[
-                styles.genderCard,
-                selectedGender === 'male' && styles.genderCardActive
-              ]}
-              onPress={() => handleGenderSelect('male')}
-            >
-              <View style={[
-                styles.genderIconContainer,
-                selectedGender === 'male' && styles.genderIconContainerActive
-              ]}>
-                <User size={20} color={selectedGender === 'male' ? '#FFFFFF' : '#2563EB'} />
-              </View>
-              <Text style={[
-                styles.genderText,
-                selectedGender === 'male' && styles.genderTextActive
-              ]}>Male</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.genderCard,
-                selectedGender === 'female' && styles.genderCardActive
-              ]}
-              onPress={() => handleGenderSelect('female')}
-            >
-              <View style={[
-                styles.genderIconContainer,
-                selectedGender === 'female' && styles.genderIconContainerActive
-              ]}>
-                <Users size={20} color={selectedGender === 'female' ? '#FFFFFF' : '#2563EB'} />
-              </View>
-              <Text style={[
-                styles.genderText,
-                selectedGender === 'female' && styles.genderTextActive
-              ]}>Female</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {selectedGender && (
-          <View style={styles.selectionSection}>
-            <Text style={styles.sectionTitle}>What's your age range?</Text>
-            <AgeSelector
-              selectedAge={selectedAge}
-              onAgeSelect={handleAgeSelect}
-            />
-          </View>
-        )}
-
-        {selectedGender && selectedAge && (
-          <View style={styles.continueSection}>
-            <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
-              <Brain size={20} color="#FFFFFF" />
-              <Text style={styles.continueButtonText}>Start Assessment</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        <View style={styles.featuresSection}>
-          <Text style={styles.featuresTitle}>Why choose us</Text>
-          <View style={styles.featuresList}>
-            <View style={styles.featureItem}>
-              <Brain size={20} color="#2563EB" />
-              <Text style={styles.featureText}>Smart symptom analysis</Text>
-            </View>
-            <View style={styles.featureItem}>
-              <Activity size={20} color="#059669" />
-              <Text style={styles.featureText}>Easy questions</Text>
-            </View>
-            <View style={styles.featureItem}>
-              <Stethoscope size={20} color="#7C3AED" />
-              <Text style={styles.featureText}>Professional insights</Text>
-            </View>
-          </View>
-        </View>
-
-        <View style={styles.disclaimer}>
-          <Text style={styles.disclaimerText}>
-            <Text style={styles.disclaimerTitle}>Important: </Text>
-            This app provides health information but cannot replace a doctor. Always consult healthcare professionals for medical concerns.
-          </Text>
-        </View>
-      </ScrollView>
-
-      <EmergencyButton onPress={handleEmergencyPress} />
-      
-      <SlideMenu
-        visible={showMenu}
-        onClose={() => setShowMenu(false)}
-        onNavigate={handleMenuNavigate}
-      />
-    </View>
+      </Animated.View>
+    </PanGestureHandler>
   );
 }
 
@@ -251,52 +293,52 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    paddingTop: 20,
-    paddingBottom: 30,
+    paddingTop: 10,
+    paddingBottom: 20,
   },
   logoContainer: {
     position: 'relative',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   activityIcon: {
     position: 'absolute',
-    top: -8,
+    top: -6,
     right: -8,
   },
   title: {
-    fontSize: 36,
+    fontSize: 28,
     fontFamily: 'Inter-Bold',
     color: '#1F2937',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   subtitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: 'Inter-SemiBold',
     color: '#2563EB',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   description: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: 'Inter-Regular',
     color: '#6B7280',
     textAlign: 'center',
-    lineHeight: 24,
-    maxWidth: 320,
+    lineHeight: 20,
+    maxWidth: 280,
   },
   selectionSection: {
-    marginBottom: 32,
+    marginBottom: 24,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: 'Inter-SemiBold',
     color: '#1F2937',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   sectionSubtitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: 'Inter-Regular',
     color: '#6B7280',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   genderSelector: {
     flexDirection: 'row',
@@ -341,7 +383,7 @@ const styles = StyleSheet.create({
     color: '#2563EB',
   },
   continueSection: {
-    marginBottom: 32,
+    marginBottom: 24,
   },
   continueButton: {
     backgroundColor: '#2563EB',
@@ -424,13 +466,13 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   featuresSection: {
-    marginBottom: 32,
+    marginBottom: 24,
   },
   featuresTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: 'Inter-SemiBold',
     color: '#1F2937',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   featuresList: {
     backgroundColor: '#FFFFFF',
