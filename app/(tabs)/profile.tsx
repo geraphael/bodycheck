@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, Image } from 'react-native';
-import { User, Phone, Mail, Calendar, Droplets, Pill, Heart, Edit3, Save, X, Camera } from 'lucide-react-native';
+import { User, Phone, Mail, Calendar, Droplets, Pill, Heart, CreditCard as Edit3, Save, X, Camera } from 'lucide-react-native';
 import { savePersonalInfo, getPersonalInfo, PersonalInfo } from '@/utils/storage';
 
 export default function ProfileScreen() {
