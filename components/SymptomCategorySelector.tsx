@@ -144,7 +144,7 @@ export default function SymptomCategorySelector({ gender, age, onCategoryPress }
                 <Text style={styles.symptomsLabel}>Common symptoms:</Text>
                 <Text style={styles.symptomsText}>
                   {category.commonSymptoms.slice(0, 2).join(', ')}
-                  {category.commonSymptoms.length > 2 && '...'}
+                  {category.commonSymptoms.length > 2 ? '...' : ''}
                 </Text>
               </View>
             </TouchableOpacity>
