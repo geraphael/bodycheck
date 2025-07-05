@@ -36,8 +36,10 @@ export default function RootLayout() {
   return (
     <>
       <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="splash" />
+        <Stack.Screen name="auth" />
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="assessment/[zone]" />
+        <Stack.Screen name="assessment/[category]" />
         <Stack.Screen name="results" />
         <Stack.Screen name="emergency" />
         <Stack.Screen name="+not-found" />

@@ -1,8 +1,8 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Platform } from 'react-native';
 import { useState, useEffect } from 'react';
 import { MapPin, Phone, Navigation, Clock, Star } from 'lucide-react-native';
-import * as Location from 'expo-location';
 import * as Linking from 'expo-linking';
+import LocationService from '@/utils/locationService';
 
 interface Hospital {
   id: string;
@@ -20,44 +20,33 @@ interface Hospital {
 }
 
 export default function HospitalsScreen() {
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [locationSource, setLocationSource] = useState<string>('');
 
   useEffect(() => {
-    getLocationAndFindHospitals();
+    findNearbyHospitals();
   }, []);
 
-  const getLocationAndFindHospitals = async () => {
+  const findNearbyHospitals = async () => {
     try {
-      if (Platform.OS === 'web') {
-        // Web fallback with mock data
-        setHospitals(mockHospitals);
-        setLoading(false);
-        return;
+      setLoading(true);
+      setError(null);
+
+      // Request location permission and get current location
+      await LocationService.requestLocationPermission();
+      const nearbyHospitals = await LocationService.findNearbyHospitals(15);
+      
+      const currentLocation = LocationService.getCachedLocation();
+      if (currentLocation) {
+        setLocationSource(currentLocation.source);
       }
-
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setError('Location permission denied');
-        setLoading(false);
-        return;
-      }
-
-      const currentLocation = await Location.getCurrentPositionAsync({});
-      setLocation(currentLocation);
-
-      // In a real app, you'd query a hospital database API here
-      // For now, we'll use mock data with realistic locations
-      const nearbyHospitals = mockHospitals.map(hospital => ({
-        ...hospital,
-        distance: Math.random() * 2 + 0.5, // Random distance between 0.5-2.5 miles
-      })).sort((a, b) => a.distance - b.distance);
 
       setHospitals(nearbyHospitals);
     } catch (err) {
-      setError('Failed to get location');
+      setError('Unable to find nearby hospitals');
+      console.error('Hospital search error:', err);
     } finally {
       setLoading(false);
     }
@@ -77,10 +66,24 @@ export default function HospitalsScreen() {
     }
   };
 
+  const getLocationSourceText = () => {
+    switch (locationSource) {
+      case 'gps':
+        return 'Using GPS location';
+      case 'ip':
+        return 'Using approximate location';
+      case 'fallback':
+        return 'Using default location';
+      default:
+        return '';
+    }
+  };
+
   if (loading) {
     return (
       <View style={styles.centerContainer}>
         <Text style={styles.loadingText}>Finding nearby hospitals...</Text>
+        <Text style={styles.loadingSubtext}>Getting your location...</Text>
       </View>
     );
   }
@@ -89,7 +92,7 @@ export default function HospitalsScreen() {
     return (
       <View style={styles.centerContainer}>
         <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity style={styles.retryButton} onPress={getLocationAndFindHospitals}>
+        <TouchableOpacity style={styles.retryButton} onPress={findNearbyHospitals}>
           <Text style={styles.retryButtonText}>Retry</Text>
         </TouchableOpacity>
       </View>
@@ -101,7 +104,7 @@ export default function HospitalsScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Nearby Hospitals</Text>
         <Text style={styles.subtitle}>
-          {Platform.OS === 'web' ? 'Sample locations' : `${hospitals.length} hospitals found`}
+          {hospitals.length} hospitals found • {getLocationSourceText()}
         </Text>
       </View>
 
@@ -132,7 +135,7 @@ export default function HospitalsScreen() {
               </View>
               
               <View style={styles.infoRow}>
-                <Text style={styles.distance}>{hospital.distance.toFixed(1)} miles away</Text>
+                <Text style={styles.distance}>{hospital.distance} miles away</Text>
                 <View style={styles.rating}>
                   <Star size={14} color="#F59E0B" />
                   <Text style={styles.ratingText}>{hospital.rating}</Text>
@@ -159,57 +162,19 @@ export default function HospitalsScreen() {
             </View>
           </View>
         ))}
+
+        {hospitals.length === 0 && (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateText}>No hospitals found in your area</Text>
+            <TouchableOpacity style={styles.retryButton} onPress={findNearbyHospitals}>
+              <Text style={styles.retryButtonText}>Search Again</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </ScrollView>
     </View>
   );
 }
-
-const mockHospitals: Hospital[] = [
-  {
-    id: '1',
-    name: 'City General Hospital',
-    address: '123 Main St, Downtown',
-    distance: 0.8,
-    phone: '(555) 123-4567',
-    rating: 4.2,
-    isOpen: true,
-    hasEmergency: true,
-    coordinates: { latitude: 40.7128, longitude: -74.0060 }
-  },
-  {
-    id: '2',
-    name: 'Regional Medical Center',
-    address: '456 Oak Ave, Midtown',
-    distance: 1.2,
-    phone: '(555) 234-5678',
-    rating: 4.5,
-    isOpen: true,
-    hasEmergency: true,
-    coordinates: { latitude: 40.7589, longitude: -73.9851 }
-  },
-  {
-    id: '3',
-    name: 'Community Health Clinic',
-    address: '789 Pine St, Uptown',
-    distance: 1.8,
-    phone: '(555) 345-6789',
-    rating: 4.0,
-    isOpen: false,
-    hasEmergency: false,
-    coordinates: { latitude: 40.7831, longitude: -73.9712 }
-  },
-  {
-    id: '4',
-    name: 'Metro Emergency Center',
-    address: '321 Elm St, East Side',
-    distance: 2.1,
-    phone: '(555) 456-7890',
-    rating: 4.3,
-    isOpen: true,
-    hasEmergency: true,
-    coordinates: { latitude: 40.7505, longitude: -73.9934 }
-  },
-];
 
 const styles = StyleSheet.create({
   container: {
@@ -228,13 +193,13 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontFamily: 'Inter-Bold',
     color: '#1F2937',
     marginBottom: 4,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: 'Inter-Regular',
     color: '#6B7280',
   },
@@ -375,6 +340,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     color: '#6B7280',
   },
+  loadingSubtext: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    color: '#9CA3AF',
+    marginTop: 8,
+  },
   errorText: {
     fontSize: 16,
     fontFamily: 'Inter-Regular',
@@ -392,5 +363,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Inter-SemiBold',
     color: '#FFFFFF',
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    color: '#6B7280',
+    marginBottom: 16,
+    textAlign: 'center',
   },
 });

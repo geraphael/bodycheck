@@ -1,67 +1,62 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, TextInput } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useLocalSearchParams, router } from 'expo-router';
-import { ChevronLeft, ChevronRight, Brain, CircleCheck as CheckCircle, TriangleAlert as AlertTriangle } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, Brain, CircleCheck as CheckCircle, TriangleAlert as AlertTriangle, MessageSquare } from 'lucide-react-native';
 import { saveAssessmentData } from '@/utils/storage';
-import { getSymptomHierarchy, generateAIDiagnosis } from '@/utils/symptomEngine';
+import AdaptiveInterviewEngine, { InterviewQuestion, InterviewContext, DiagnosticSuggestion } from '@/utils/adaptiveInterview';
 
-interface Symptom {
-  id: string;
-  name: string;
-  description: string;
-  severity: 'mild' | 'moderate' | 'severe';
-  relatedDiseases: string[];
-}
-
-interface Question {
-  id: string;
-  text: string;
-  type: 'binary' | 'multiple' | 'scale' | 'symptoms';
-  options?: string[];
-  symptoms?: Symptom[];
-  required: boolean;
-  followUpLogic?: (response: any, previousResponses: Record<string, any>) => string | null;
-}
-
-export default function AssessmentScreen() {
+export default function AdaptiveAssessmentScreen() {
   const { category, gender, age } = useLocalSearchParams<{ 
     category: string; 
     gender: string; 
     age: string; 
   }>();
   
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [responses, setResponses] = useState<Record<string, any>>({});
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
+  const [currentQuestion, setCurrentQuestion] = useState<InterviewQuestion | null>(null);
+  const [context, setContext] = useState<InterviewContext>({
+    responses: {},
+    selectedSymptoms: [],
+    currentSeverity: 0,
+    suspectedConditions: [],
+    riskFactors: [],
+    demographics: {
+      age: age || '',
+      gender: gender || ''
+    }
+  });
+  const [questionHistory, setQuestionHistory] = useState<InterviewQuestion[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [possibleDiseases, setPossibleDiseases] = useState<string[]>([]);
+  const [openResponse, setOpenResponse] = useState('');
+  const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
 
   useEffect(() => {
-    const hierarchyQuestions = getSymptomHierarchy(category || '', gender || '', age || '');
-    setQuestions(hierarchyQuestions);
-  }, [category, gender, age]);
-
-  const currentQuestion = questions[currentQuestionIndex];
-  const isLastQuestion = currentQuestionIndex === questions.length - 1;
+    // Start with initial questions
+    const initialQuestions = AdaptiveInterviewEngine.generateInitialQuestions();
+    if (initialQuestions.length > 0) {
+      setCurrentQuestion(initialQuestions[0]);
+      setQuestionHistory([initialQuestions[0]]);
+    }
+  }, []);
 
   const handleResponse = (value: any) => {
-    const newResponses = {
-      ...responses,
-      [currentQuestion.id]: value,
-    };
-    setResponses(newResponses);
+    if (!currentQuestion) return;
 
-    // Update possible diseases based on current responses
-    if (currentQuestion.type === 'symptoms' && Array.isArray(value)) {
-      const diseases = new Set<string>();
-      value.forEach((symptomId: string) => {
-        const symptom = currentQuestion.symptoms?.find(s => s.id === symptomId);
-        if (symptom) {
-          symptom.relatedDiseases.forEach(disease => diseases.add(disease));
-        }
-      });
-      setPossibleDiseases(Array.from(diseases));
+    const updatedContext = AdaptiveInterviewEngine.updateContext(
+      context,
+      currentQuestion.id,
+      value
+    );
+    setContext(updatedContext);
+
+    // Get next question
+    const nextQuestion = AdaptiveInterviewEngine.getNextQuestion(updatedContext);
+    
+    if (nextQuestion) {
+      setCurrentQuestion(nextQuestion);
+      setQuestionHistory(prev => [...prev, nextQuestion]);
+    } else {
+      // Interview complete, generate diagnosis
+      completeAssessment(updatedContext);
     }
   };
 
@@ -71,77 +66,103 @@ export default function AssessmentScreen() {
       : [...selectedSymptoms, symptomId];
     
     setSelectedSymptoms(newSymptoms);
-    handleResponse(newSymptoms);
+    
+    const updatedContext = {
+      ...context,
+      selectedSymptoms: newSymptoms
+    };
+    setContext(updatedContext);
   };
 
-  const getNextQuestion = () => {
-    if (currentQuestion.followUpLogic) {
-      const nextQuestionId = currentQuestion.followUpLogic(
-        responses[currentQuestion.id], 
-        responses
-      );
-      if (nextQuestionId) {
-        const nextIndex = questions.findIndex(q => q.id === nextQuestionId);
-        return nextIndex !== -1 ? nextIndex : currentQuestionIndex + 1;
-      }
-    }
-    return currentQuestionIndex + 1;
-  };
+  const handleNext = () => {
+    if (!currentQuestion) return;
 
-  const handleNext = async () => {
-    if (isLastQuestion) {
-      setIsProcessing(true);
-      
-      // Simulate AI processing time (40 seconds)
-      setTimeout(async () => {
-        const assessmentData = {
-          category,
-          gender,
-          age,
-          responses,
-          selectedSymptoms,
-          possibleDiseases,
-          timestamp: new Date().toISOString(),
-        };
-        
-        await saveAssessmentData(assessmentData);
-        
-        // Generate AI diagnosis
-        const aiDiagnosis = await generateAIDiagnosis(assessmentData);
-        
-        router.push({
-          pathname: '/results',
-          params: {
-            category,
-            gender,
-            age,
-            responses: JSON.stringify(responses),
-            symptoms: JSON.stringify(selectedSymptoms),
-            diseases: JSON.stringify(possibleDiseases),
-            aiDiagnosis: JSON.stringify(aiDiagnosis),
-          },
-        });
-      }, 40000); // 40 seconds
-    } else {
-      const nextIndex = getNextQuestion();
-      setCurrentQuestionIndex(nextIndex);
+    let responseValue;
+    
+    switch (currentQuestion.type) {
+      case 'open':
+        responseValue = openResponse;
+        break;
+      case 'symptoms':
+        responseValue = selectedSymptoms;
+        break;
+      default:
+        responseValue = context.responses[currentQuestion.id];
+        break;
     }
+
+    if (currentQuestion.required && !responseValue) {
+      return; // Don't proceed if required field is empty
+    }
+
+    handleResponse(responseValue);
+    setOpenResponse(''); // Reset for next question
   };
 
   const handlePrevious = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(prev => prev - 1);
+    if (questionHistory.length > 1) {
+      const newHistory = questionHistory.slice(0, -1);
+      const previousQuestion = newHistory[newHistory.length - 1];
+      
+      setQuestionHistory(newHistory);
+      setCurrentQuestion(previousQuestion);
+      
+      // Remove the last response from context
+      const newResponses = { ...context.responses };
+      delete newResponses[currentQuestion?.id || ''];
+      
+      setContext(prev => ({
+        ...prev,
+        responses: newResponses
+      }));
     }
+  };
+
+  const completeAssessment = async (finalContext: InterviewContext) => {
+    setIsProcessing(true);
+    
+    // Simulate processing time
+    setTimeout(async () => {
+      const diagnoses = AdaptiveInterviewEngine.generateDiagnosis(finalContext);
+      
+      const assessmentData = {
+        category,
+        gender,
+        age,
+        responses: finalContext.responses,
+        selectedSymptoms: finalContext.selectedSymptoms,
+        suspectedConditions: finalContext.suspectedConditions,
+        timestamp: new Date().toISOString(),
+      };
+      
+      await saveAssessmentData(assessmentData);
+      
+      router.push({
+        pathname: '/results',
+        params: {
+          category,
+          gender,
+          age,
+          responses: JSON.stringify(finalContext.responses),
+          symptoms: JSON.stringify(finalContext.selectedSymptoms),
+          diseases: JSON.stringify(finalContext.suspectedConditions),
+          aiDiagnosis: JSON.stringify(diagnoses[0]),
+        },
+      });
+    }, 3000);
   };
 
   const canProceed = () => {
     if (!currentQuestion?.required) return true;
     
-    if (currentQuestion.type === 'symptoms') {
-      return selectedSymptoms.length > 0;
+    switch (currentQuestion.type) {
+      case 'open':
+        return openResponse.trim().length > 0;
+      case 'symptoms':
+        return selectedSymptoms.length > 0;
+      default:
+        return context.responses[currentQuestion.id] !== undefined;
     }
-    
-    return responses[currentQuestion.id] !== undefined;
   };
 
   const getSeverityColor = (severity: string) => {
@@ -158,40 +179,36 @@ export default function AssessmentScreen() {
       <View style={styles.processingContainer}>
         <View style={styles.processingCard}>
           <Brain size={48} color="#2563EB" />
-          <Text style={styles.processingTitle}>Analyzing Your Health Information</Text>
+          <Text style={styles.processingTitle}>Analyzing Your Responses</Text>
           <Text style={styles.processingSubtitle}>
-            Our smart system is looking at your symptoms and creating a personalized health report
+            Our AI is processing your symptoms and generating personalized health insights
           </Text>
           
           <View style={styles.progressContainer}>
             <ActivityIndicator size="large" color="#2563EB" />
             <Text style={styles.progressText}>
-              Reviewing your answers and creating your health insights...
+              Analyzing symptom patterns and generating recommendations...
             </Text>
           </View>
           
           <View style={styles.processingSteps}>
             <View style={styles.stepItem}>
               <CheckCircle size={16} color="#059669" />
-              <Text style={styles.stepText}>Looking at your symptoms</Text>
+              <Text style={styles.stepText}>Reviewing your responses</Text>
             </View>
             <View style={styles.stepItem}>
               <CheckCircle size={16} color="#059669" />
-              <Text style={styles.stepText}>Checking medical information</Text>
+              <Text style={styles.stepText}>Analyzing symptom patterns</Text>
             </View>
             <View style={styles.stepItem}>
               <ActivityIndicator size={16} color="#2563EB" />
-              <Text style={styles.stepText}>Creating your health report</Text>
+              <Text style={styles.stepText}>Generating health insights</Text>
             </View>
             <View style={styles.stepItem}>
               <View style={[styles.stepDot, { backgroundColor: '#E5E7EB' }]} />
               <Text style={[styles.stepText, { color: '#9CA3AF' }]}>Preparing recommendations</Text>
             </View>
           </View>
-          
-          <Text style={styles.timeEstimate}>
-            This usually takes about 40 seconds
-          </Text>
         </View>
       </View>
     );
@@ -200,7 +217,7 @@ export default function AssessmentScreen() {
   if (!currentQuestion) {
     return (
       <View style={styles.container}>
-        <Text>Loading your health assessment...</Text>
+        <Text>Loading assessment...</Text>
       </View>
     );
   }
@@ -214,7 +231,7 @@ export default function AssessmentScreen() {
         <View style={styles.headerInfo}>
           <Text style={styles.title}>Health Assessment</Text>
           <Text style={styles.subtitle}>
-            {category?.charAt(0).toUpperCase() + category?.slice(1)} <Text>•</Text> {gender} <Text>•</Text> {age}
+            {category?.charAt(0).toUpperCase() + category?.slice(1)} • {gender} • {age}
           </Text>
         </View>
       </View>
@@ -224,28 +241,51 @@ export default function AssessmentScreen() {
           <View 
             style={[
               styles.progressFill,
-              { width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` }
+              { width: `${Math.min(100, (questionHistory.length / 10) * 100)}%` }
             ]}
           />
         </View>
         <Text style={styles.progressText}>
-          {currentQuestionIndex + 1} of {questions.length} questions
+          Question {questionHistory.length} • Adaptive Interview
         </Text>
       </View>
 
-      {possibleDiseases.length > 0 && (
-        <View style={styles.diseasesHint}>
+      {context.suspectedConditions.length > 0 && (
+        <View style={styles.conditionsHint}>
           <Brain size={16} color="#2563EB" />
-          <Text style={styles.diseasesHintText}>
-            We're considering: {possibleDiseases.slice(0, 3).join(', ')}
-            {possibleDiseases.length > 3 && ` +${possibleDiseases.length - 3} more`}
+          <Text style={styles.conditionsHintText}>
+            Considering: {context.suspectedConditions.slice(0, 2).join(', ')}
+            {context.suspectedConditions.length > 2 && ` +${context.suspectedConditions.length - 2} more`}
           </Text>
         </View>
       )}
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.questionContainer}>
-          <Text style={styles.questionText}>{currentQuestion.text}</Text>
+          <View style={styles.questionHeader}>
+            {currentQuestion.type === 'open' && (
+              <MessageSquare size={20} color="#2563EB" />
+            )}
+            <Text style={styles.questionText}>{currentQuestion.text}</Text>
+          </View>
+
+          {currentQuestion.type === 'open' && (
+            <View style={styles.openResponseContainer}>
+              <TextInput
+                style={styles.openResponseInput}
+                value={openResponse}
+                onChangeText={setOpenResponse}
+                placeholder="Please describe your symptoms in your own words..."
+                placeholderTextColor="#9CA3AF"
+                multiline
+                numberOfLines={4}
+                textAlignVertical="top"
+              />
+              <Text style={styles.inputHint}>
+                Take your time to describe what you're experiencing
+              </Text>
+            </View>
+          )}
 
           {currentQuestion.type === 'symptoms' && (
             <View style={styles.symptomsContainer}>
@@ -280,11 +320,6 @@ export default function AssessmentScreen() {
                   ]}>
                     {symptom.description}
                   </Text>
-                  {symptom.relatedDiseases.length > 0 && (
-                    <Text style={styles.relatedDiseases}>
-                      May be related to: {symptom.relatedDiseases.slice(0, 2).join(', ')}
-                    </Text>
-                  )}
                 </TouchableOpacity>
               ))}
             </View>
@@ -297,13 +332,13 @@ export default function AssessmentScreen() {
                   key={option}
                   style={[
                     styles.optionButton,
-                    responses[currentQuestion.id] === option && styles.optionButtonSelected
+                    context.responses[currentQuestion.id] === option && styles.optionButtonSelected
                   ]}
                   onPress={() => handleResponse(option)}
                 >
                   <Text style={[
                     styles.optionText,
-                    responses[currentQuestion.id] === option && styles.optionTextSelected
+                    context.responses[currentQuestion.id] === option && styles.optionTextSelected
                   ]}>
                     {option}
                   </Text>
@@ -319,13 +354,13 @@ export default function AssessmentScreen() {
                   key={option}
                   style={[
                     styles.optionButton,
-                    responses[currentQuestion.id] === option && styles.optionButtonSelected
+                    context.responses[currentQuestion.id] === option && styles.optionButtonSelected
                   ]}
                   onPress={() => handleResponse(option)}
                 >
                   <Text style={[
                     styles.optionText,
-                    responses[currentQuestion.id] === option && styles.optionTextSelected
+                    context.responses[currentQuestion.id] === option && styles.optionTextSelected
                   ]}>
                     {option}
                   </Text>
@@ -337,8 +372,8 @@ export default function AssessmentScreen() {
           {currentQuestion.type === 'scale' && (
             <View style={styles.scaleContainer}>
               <View style={styles.scaleLabels}>
-                <Text style={styles.scaleLabel}>No discomfort</Text>
-                <Text style={styles.scaleLabel}>Very uncomfortable</Text>
+                <Text style={styles.scaleLabel}>Not affecting me</Text>
+                <Text style={styles.scaleLabel}>Severely affecting me</Text>
               </View>
               <View style={styles.scaleOptions}>
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((number) => (
@@ -346,13 +381,13 @@ export default function AssessmentScreen() {
                     key={number}
                     style={[
                       styles.scaleButton,
-                      responses[currentQuestion.id] === number && styles.scaleButtonSelected
+                      context.responses[currentQuestion.id] === number && styles.scaleButtonSelected
                     ]}
                     onPress={() => handleResponse(number)}
                   >
                     <Text style={[
                       styles.scaleButtonText,
-                      responses[currentQuestion.id] === number && styles.scaleButtonTextSelected
+                      context.responses[currentQuestion.id] === number && styles.scaleButtonTextSelected
                     ]}>
                       {number}
                     </Text>
@@ -361,19 +396,49 @@ export default function AssessmentScreen() {
               </View>
             </View>
           )}
+
+          {currentQuestion.type === 'duration' && (
+            <View style={styles.optionsContainer}>
+              {[
+                'Less than 1 hour ago',
+                '1-6 hours ago',
+                '6-24 hours ago',
+                '1-3 days ago',
+                '3-7 days ago',
+                '1-2 weeks ago',
+                'More than 2 weeks ago'
+              ].map((option) => (
+                <TouchableOpacity
+                  key={option}
+                  style={[
+                    styles.optionButton,
+                    context.responses[currentQuestion.id] === option && styles.optionButtonSelected
+                  ]}
+                  onPress={() => handleResponse(option)}
+                >
+                  <Text style={[
+                    styles.optionText,
+                    context.responses[currentQuestion.id] === option && styles.optionTextSelected
+                  ]}>
+                    {option}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
         </View>
       </ScrollView>
 
       <View style={styles.navigationContainer}>
         <TouchableOpacity
-          style={[styles.navButton, currentQuestionIndex === 0 && styles.navButtonDisabled]}
+          style={[styles.navButton, questionHistory.length <= 1 && styles.navButtonDisabled]}
           onPress={handlePrevious}
-          disabled={currentQuestionIndex === 0}
+          disabled={questionHistory.length <= 1}
         >
-          <ChevronLeft size={20} color={currentQuestionIndex === 0 ? '#9CA3AF' : '#2563EB'} />
+          <ChevronLeft size={20} color={questionHistory.length <= 1 ? '#9CA3AF' : '#2563EB'} />
           <Text style={[
             styles.navButtonText,
-            currentQuestionIndex === 0 && styles.navButtonTextDisabled
+            questionHistory.length <= 1 && styles.navButtonTextDisabled
           ]}>
             Previous
           </Text>
@@ -389,7 +454,7 @@ export default function AssessmentScreen() {
             styles.nextButtonText,
             !canProceed() && styles.navButtonTextDisabled
           ]}>
-            {isLastQuestion ? 'Get My Health Report' : 'Next'}
+            Continue
           </Text>
           <ChevronRight size={20} color={canProceed() ? '#FFFFFF' : '#9CA3AF'} />
         </TouchableOpacity>
@@ -417,7 +482,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 24,
+    fontSize: 20,
     fontFamily: 'Inter-Bold',
     color: '#1F2937',
   },
@@ -449,7 +514,7 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     textAlign: 'center',
   },
-  diseasesHint: {
+  conditionsHint: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#EFF6FF',
@@ -460,7 +525,7 @@ const styles = StyleSheet.create({
     gap: 12,
     marginBottom: 20,
   },
-  diseasesHintText: {
+  conditionsHintText: {
     fontSize: 12,
     fontFamily: 'Inter-Medium',
     color: '#2563EB',
@@ -480,12 +545,38 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
+  questionHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+    marginBottom: 24,
+  },
   questionText: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: 'Inter-SemiBold',
     color: '#1F2937',
-    marginBottom: 24,
-    lineHeight: 28,
+    lineHeight: 26,
+    flex: 1,
+  },
+  openResponseContainer: {
+    gap: 12,
+  },
+  openResponseInput: {
+    backgroundColor: '#F9FAFB',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    color: '#1F2937',
+    minHeight: 120,
+  },
+  inputHint: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    color: '#6B7280',
+    fontStyle: 'italic',
   },
   symptomsContainer: {
     gap: 12,
@@ -531,16 +622,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Inter-Regular',
     color: '#6B7280',
-    marginBottom: 8,
   },
   symptomDescriptionSelected: {
     color: '#2563EB',
-  },
-  relatedDiseases: {
-    fontSize: 12,
-    fontFamily: 'Inter-Medium',
-    color: '#7C3AED',
-    fontStyle: 'italic',
   },
   optionsContainer: {
     gap: 12,
@@ -688,7 +772,6 @@ const styles = StyleSheet.create({
   processingSteps: {
     width: '100%',
     gap: 16,
-    marginBottom: 24,
   },
   stepItem: {
     flexDirection: 'row',
@@ -704,11 +787,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Inter-Medium',
     color: '#374151',
-  },
-  timeEstimate: {
-    fontSize: 12,
-    fontFamily: 'Inter-Regular',
-    color: '#9CA3AF',
-    textAlign: 'center',
   },
 });
